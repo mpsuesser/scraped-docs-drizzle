@@ -2,8 +2,8 @@
 url: https://orm.drizzle.team/docs/sqlite/tutorials/drizzle-with-xata
 title: "Drizzle With Xata"
 description: ""
-access_date: 2026-08-03T19:38:26.356Z
-current_date: 2026-08-03T19:38:26.356Z
+access_date: 2026-08-03T19:43:09.006Z
+current_date: 2026-08-03T19:43:09.006Z
 ---
 
 ## Drizzle with Xata

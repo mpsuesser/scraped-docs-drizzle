@@ -2,8 +2,8 @@
 url: https://orm.drizzle.team/docs/sqlite/guides/update-many-with-different-value
 title: "Update Many With Different Value"
 description: ""
-access_date: 2026-08-03T19:38:26.356Z
-current_date: 2026-08-03T19:38:26.356Z
+access_date: 2026-08-03T19:43:09.006Z
+current_date: 2026-08-03T19:43:09.006Z
 ---
 
 ## Update many with different values for each row

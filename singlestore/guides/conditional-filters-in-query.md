@@ -2,8 +2,8 @@
 url: https://orm.drizzle.team/docs/singlestore/guides/conditional-filters-in-query
 title: "Conditional Filters In Query"
 description: ""
-access_date: 2026-08-03T19:38:26.356Z
-current_date: 2026-08-03T19:38:26.356Z
+access_date: 2026-08-03T19:43:09.006Z
+current_date: 2026-08-03T19:43:09.006Z
 ---
 
 ## Conditional filters in query

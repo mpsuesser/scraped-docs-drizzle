@@ -2,8 +2,8 @@
 url: https://orm.drizzle.team/docs/cockroach/guides/full-text-search-with-generated-columns
 title: "Full Text Search With Generated Columns"
 description: ""
-access_date: 2026-08-03T19:38:26.356Z
-current_date: 2026-08-03T19:38:26.356Z
+access_date: 2026-08-03T19:43:09.006Z
+current_date: 2026-08-03T19:43:09.006Z
 ---
 
 ## Full-text search with Generated Columns

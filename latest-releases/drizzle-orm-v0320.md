@@ -2,8 +2,8 @@
 url: https://orm.drizzle.team/docs/latest-releases/drizzle-orm-v0320
 title: "Drizzle Orm V0320"
 description: ""
-access_date: 2026-08-03T19:38:26.356Z
-current_date: 2026-08-03T19:38:26.356Z
+access_date: 2026-08-03T19:43:09.006Z
+current_date: 2026-08-03T19:43:09.006Z
 ---
 
 ## DrizzleORM v0.32.0 release
