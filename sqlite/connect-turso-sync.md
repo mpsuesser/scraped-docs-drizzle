@@ -2,8 +2,8 @@
 url: https://orm.drizzle.team/docs/sqlite/connect-turso-sync
 title: "Connect Turso Sync"
 description: ""
-access_date: 2026-08-03T19:00:22.305Z
-current_date: 2026-08-03T19:00:22.305Z
+access_date: 2026-08-03T19:08:17.353Z
+current_date: 2026-08-03T19:08:17.353Z
 ---
 
 ## Drizzle <> Turso Database Sync

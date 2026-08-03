@@ -2,8 +2,8 @@
 url: https://orm.drizzle.team/docs/latest-releases/drizzle-orm-v0303
 title: "Drizzle Orm V0303"
 description: ""
-access_date: 2026-08-03T19:00:22.305Z
-current_date: 2026-08-03T19:00:22.305Z
+access_date: 2026-08-03T19:08:17.353Z
+current_date: 2026-08-03T19:08:17.353Z
 ---
 
 ## DrizzleORM v0.30.3 release
