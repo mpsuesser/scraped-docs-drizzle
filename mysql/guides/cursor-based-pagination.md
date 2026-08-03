@@ -2,8 +2,8 @@
 url: https://orm.drizzle.team/docs/mysql/guides/cursor-based-pagination
 title: "Cursor Based Pagination"
 description: ""
-access_date: 2026-08-03T19:08:17.353Z
-current_date: 2026-08-03T19:08:17.353Z
+access_date: 2026-08-03T19:38:26.356Z
+current_date: 2026-08-03T19:38:26.356Z
 ---
 
 ## SQL Cursor-based pagination

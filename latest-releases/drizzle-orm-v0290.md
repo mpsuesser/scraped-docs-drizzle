@@ -2,8 +2,8 @@
 url: https://orm.drizzle.team/docs/latest-releases/drizzle-orm-v0290
 title: "Drizzle Orm V0290"
 description: ""
-access_date: 2026-08-03T19:08:17.353Z
-current_date: 2026-08-03T19:08:17.353Z
+access_date: 2026-08-03T19:38:26.356Z
+current_date: 2026-08-03T19:38:26.356Z
 ---
 
 ## DrizzleORM v0.29.0 release

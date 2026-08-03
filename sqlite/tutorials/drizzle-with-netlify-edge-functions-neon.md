@@ -2,8 +2,8 @@
 url: https://orm.drizzle.team/docs/sqlite/tutorials/drizzle-with-netlify-edge-functions-neon
 title: "Drizzle With Netlify Edge Functions Neon"
 description: ""
-access_date: 2026-08-03T19:08:17.353Z
-current_date: 2026-08-03T19:08:17.353Z
+access_date: 2026-08-03T19:38:26.356Z
+current_date: 2026-08-03T19:38:26.356Z
 ---
 
 ## Drizzle with Netlify Edge Functions and Neon Postgres

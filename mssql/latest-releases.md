@@ -2,8 +2,8 @@
 url: https://orm.drizzle.team/docs/mssql/latest-releases
 title: "Latest Releases"
 description: ""
-access_date: 2026-08-03T19:08:17.353Z
-current_date: 2026-08-03T19:08:17.353Z
+access_date: 2026-08-03T19:38:26.356Z
+current_date: 2026-08-03T19:38:26.356Z
 ---
 
 Latest Releases[Drizzle ORM and Drizzle Kit v1.0.0-beta.2 release](../latest-releases/drizzle-orm-v1beta2.md)

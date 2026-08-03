@@ -2,8 +2,8 @@
 url: https://orm.drizzle.team/docs/mssql/guides/toggling-a-boolean-field
 title: "Toggling A Boolean Field"
 description: ""
-access_date: 2026-08-03T19:08:17.353Z
-current_date: 2026-08-03T19:08:17.353Z
+access_date: 2026-08-03T19:38:26.356Z
+current_date: 2026-08-03T19:38:26.356Z
 ---
 
 ## SQL Toggle value

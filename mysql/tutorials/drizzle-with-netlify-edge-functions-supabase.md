@@ -2,8 +2,8 @@
 url: https://orm.drizzle.team/docs/mysql/tutorials/drizzle-with-netlify-edge-functions-supabase
 title: "Drizzle With Netlify Edge Functions Supabase"
 description: ""
-access_date: 2026-08-03T19:08:17.353Z
-current_date: 2026-08-03T19:08:17.353Z
+access_date: 2026-08-03T19:38:26.356Z
+current_date: 2026-08-03T19:38:26.356Z
 ---
 
 ## Drizzle with Netlify Edge Functions and Supabase Database
