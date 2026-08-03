@@ -1,0 +1,135 @@
+---
+url: https://orm.drizzle.team/docs/mssql/valibot
+title: "Valibot"
+description: ""
+access_date: 2026-08-03T18:54:19.022Z
+current_date: 2026-08-03T18:54:19.022Z
+---
+
+## valibot
+
+### Install the dependencies
+
+```shell
+npm i drizzle-orm@rc valibot
+```
+
+### Select schema
+
+Defines the shape of data queried from the database - can be used to validate API responses.
+
+```ts
+import { int, mssqlTable, text } from 'drizzle-orm/mssql-core';
+import { createSelectSchema } from 'drizzle-orm/valibot';
+import { parse } from 'valibot';
+
+const users = mssqlTable('users', {
+  id: int().primaryKey().identity(),
+  name: text().notNull(),
+  age: int().notNull()
+});
+
+const userSelectSchema = createSelectSchema(users);
+
+const rows = await db.select({ id: users.id, name: users.name }).top(1).from(users);
+const parsed: { id: number; name: string; age: number } = parse(userSelectSchema, rows[0]); // Error: \`age\` is not returned in the above query
+
+const rows = await db.select().top(1).from(users);
+const parsed: { id: number; name: string; age: number } = parse(userSelectSchema, rows[0]); // Will parse successfully
+```
+
+Views are also supported.
+
+```ts
+import { pgEnum, pgView } from 'drizzle-orm/mssql-core';
+import { gt } from 'drizzle-orm';
+import { createSelectSchema } from 'drizzle-orm/valibot';
+import { parse } from 'valibot';
+
+const usersView = mssqlView('users_view').as((qb) => qb.select().from(users).where(gt(users.age, 18)));
+const usersViewSchema = createSelectSchema(usersView);
+const parsed: { id: number; name: string; age: number } = parse(usersViewSchema, ...);
+```
+
+### Insert schema
+
+Defines the shape of data to be inserted into the database - can be used to validate API requests.
+
+```ts
+import { int, mssqlTable, text } from 'drizzle-orm/mssql-core';
+import { createInsertSchema } from 'drizzle-orm/valibot';
+import { parse } from 'valibot';
+
+const users = mssqlTable('users', {
+  id: int().primaryKey().identity(),
+  name: text().notNull(),
+  age: int().notNull()
+});
+
+const userInsertSchema = createInsertSchema(users);
+
+const user = { name: 'John' };
+const parsed: { name: string, age: number } = parse(userInsertSchema, user); // Error: \`age\` is not defined
+
+const user = { name: 'Jane', age: 30 };
+const parsed: { name: string, age: number } = parse(userInsertSchema, user); // Will parse successfully
+await db.insert(users).values(parsed);
+```
+
+### Update schema
+
+Defines the shape of data to be updated in the database - can be used to validate API requests.
+
+```ts
+import { int, mssqlTable, text } from 'drizzle-orm/mssql-core';
+import { createUpdateSchema } from 'drizzle-orm/valibot';
+import { parse } from 'valibot';
+
+const users = mssqlTable('users', {
+  id: int().primaryKey().identity(),
+  name: text().notNull(),
+  age: int().notNull()
+});
+
+const userUpdateSchema = createUpdateSchema(users);
+
+const user = { age: 35 };
+const parsed: { name?: string | undefined, age?: number | undefined } = parse(userUpdateSchema, user); // Will parse successfully
+await db.update(users).set(parsed).where(eq(users.name, 'Jane'));
+```
+
+### Refinements
+
+Each create schema function accepts an additional optional parameter that you can used to extend, modify or completely overwite a field’s schema. Defining a callback function will extend or modify while providing a Valibot schema will overwrite it.
+
+```ts
+import { int, mssqlTable, text } from 'drizzle-orm/mssql-core';
+import { createSelectSchema } from 'drizzle-orm/valibot';
+import { parse, pipe, maxLength, object, string } from 'valibot';
+
+const users = mssqlTable('users', {
+  id: int().primaryKey().identity(),
+  name: text().notNull(),
+  bio: text(),
+  preferences: text()
+});
+
+const userSelectSchema = createSelectSchema(users, {
+  name: (schema) => pipe(schema, maxLength(20)), // Extends schema
+  bio: (schema) => pipe(schema, maxLength(1000)), // Extends schema before becoming nullable/optional
+  preferences: object({ theme: string() }) // Overwrites the field, including its nullability
+});
+
+const parsed: {
+  id: number;
+  name: string,
+  bio: string | null;
+  preferences: {
+    theme: string;
+  };
+} = parse(userSelectSchema, ...);
+```
+
+### Data type reference
+
+MSSQL data type mappings follow the MSSQL column builders. See the [MSSQL data types](column-types.md) page for the full column reference.

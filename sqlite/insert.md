@@ -1,0 +1,205 @@
+---
+url: https://orm.drizzle.team/docs/sqlite/insert
+title: "Insert"
+description: ""
+access_date: 2026-08-03T18:54:19.022Z
+current_date: 2026-08-03T18:54:19.022Z
+---
+
+## SQL Insert
+
+All the values provided to `.values()` are parameterized automatically. For example, this query:
+
+```ts
+await db.insert(users).values({ id: 1, name: 'Andrew' });
+```
+
+will be translated to:
+
+```sql
+insert into "users" ("id", "name") values (?, ?) -- params: ['Andrew']
+```
+
+Drizzle ORM provides you the most SQL-like way to insert rows into the database tables.
+
+Inserting data with Drizzle is extremely straightforward and sql-like. See for yourself:
+
+```typescript
+await db.insert(users).values({ name: 'Andrew' });
+```
+```sql
+insert into "users" ("name") values ('Andrew');
+```
+
+If you need insert type for a particular table you can use `typeof usersTable.$inferInsert` syntax.
+
+```typescript
+type NewUser = typeof users.$inferInsert;
+
+const insertUser = async (user: NewUser) => {
+  return db.insert(users).values(user);
+}
+
+const newUser: NewUser = { name: "Alef" };
+await insertUser(newUser);
+```
+
+## returning
+
+You can insert a row and get it back in SQLite like such:
+
+```typescript
+await db.insert(users).values({ name: "Dan" }).returning();
+
+// partial return
+await db.insert(users).values({ name: "Partial Dan" }).returning({ insertedId: users.id });
+```
+
+## Insert multiple rows
+
+```typescript
+await db.insert(users).values([{ name: 'Andrew' }, { name: 'Dan' }]);
+```
+
+## Upserts and conflicts
+
+Drizzle ORM provides simple interfaces for handling upserts and conflicts.
+
+### On conflict do nothing
+
+`onConflictDoNothing` will cancel the insert if there’s a conflict:
+
+```typescript
+await db.insert(users)
+  .values({ id: 1, name: 'John' })
+  .onConflictDoNothing();
+
+// explicitly specify conflict target
+await db.insert(users)
+  .values({ id: 1, name: 'John' })
+  .onConflictDoNothing({ target: users.id });
+```
+
+### On conflict do update
+
+`onConflictDoUpdate` will update the row if there’s a conflict:
+
+```typescript
+await db.insert(users)
+  .values({ id: 1, name: 'Dan' })
+  .onConflictDoUpdate({ target: users.id, set: { name: 'John' } });
+```
+
+#### where clauses
+
+`on conflict do update` can have a `where` clause in two different places - as part of the conflict target (i.e. for partial indexes) or as part of the `update` clause:
+
+```sql
+insert into "employees" ("employee_id", "name") 
+values (123, 'John Doe') 
+on conflict ("employee_id") where name <> 'John Doe' 
+do update set "name" = excluded.name;
+
+insert into "employees" ("employee_id", "name") 
+values (123, 'John Doe') 
+on conflict ("employee_id") do update set "name" = 'John Doe' 
+where name <> 'John Doe';
+```
+
+To specify these conditions in Drizzle, you can use `setWhere` and `targetWhere` clauses:
+
+```typescript
+await db.insert(employees)
+  .values({ employeeId: 123, name: 'John Doe' })
+  .onConflictDoUpdate({
+    target: employees.employeeId,
+    targetWhere: sql\`name <> 'John Doe'\`,
+    set: { name: sql\`excluded.name\` }
+  });
+
+await db.insert(employees)
+  .values({ employeeId: 123, name: 'John Doe' })
+  .onConflictDoUpdate({
+    target: employees.employeeId,
+    set: { name: 'John Doe' },
+    setWhere: sql\`name <> 'John Doe'\`
+  });
+```
+
+Upsert with composite indexes, or composite primary keys for `onConflictDoUpdate`:
+
+```typescript
+await db.insert(users)
+  .values({ firstName: 'John', lastName: 'Doe' })
+  .onConflictDoUpdate({
+    target: [users.firstName, users.lastName],
+    set: { firstName: 'John1' }
+  });
+```
+
+## with insert clause
+
+Check how to use WITH statement with [select](select.md#with-clause), [update](update.md#with-update-clause), [delete](delete.md#with-delete-clause)
+
+Using the `with` clause can help you simplify complex queries by splitting them into smaller subqueries called common table expressions (CTEs):
+
+```typescript
+const userCount = db.$with('user_count').as(
+    db.select({ value: sql\`count(*)\`.as('value') }).from(users)
+);
+
+const result = await db.with(userCount)
+    .insert(users)
+    .values([
+        { username: 'user1', admin: sql\`((select * from ${userCount}) = 0)\` }
+    ])
+    .returning({
+        admin: users.admin
+    });
+```
+```sql
+with "user_count" as (select count(*) as "value" from "users")
+insert into "users" ("username", "admin")
+values ('user1' ((select * from "user_count") = 0))
+returning "admin"
+```
+
+## Insert into … select
+
+As the SQLite documentation mentions:
+
+The second form of the INSERT statement contains a SELECT statement instead of a VALUES clause. A new entry is inserted into the table for each row of data returned by executing the SELECT statement. If a column-list is specified, the number of columns in the result of the SELECT must be the same as the number of items in the column-list. Otherwise, if no column-list is specified, the number of columns in the result of the SELECT must be the same as the number of columns in the table. Any SELECT statement, including compound SELECTs and SELECT statements with ORDER BY and/or LIMIT clauses, may be used in an INSERT statement of this form.
+
+IMPORTANT
+
+To avoid a parsing ambiguity, the SELECT statement should always contain a WHERE clause, even if that clause is simply “WHERE true”, if the upsert-clause is present. Without the WHERE clause, the parser does not know if the token “ON” is part of a join constraint on the SELECT, or the beginning of the upsert-clause.
+
+Drizzle supports the current syntax for all dialects, and all of them share the same syntax. Let’s review some common scenarios and API usage. There are several ways to use select inside insert statements, allowing you to choose your preferred approach:
+
+- You can pass a query builder inside the select function.
+- You can use a query builder inside a callback.
+- You can pass an SQL template tag with any custom select query you want to use
+
+Query Builder
+
+Callback
+
+SQL template tag
+
+```ts
+const insertedEmployees = await db
+  .insert(employees)
+  .select(
+    db.select({ id: users.id, name: users.name }).from(users).where(eq(users.role, 'employee'))
+  )
+  .returning({
+    id: employees.id,
+    name: employees.name
+  });
+```
+```ts
+const qb = new QueryBuilder();
+await db.insert(employees).select(
+    qb.select({ id: users.id, name: users.name }).from(users).where(eq(users.role, 'employee'))
+);
+```

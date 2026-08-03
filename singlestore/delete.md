@@ -1,0 +1,54 @@
+---
+url: https://orm.drizzle.team/docs/singlestore/delete
+title: "Delete"
+description: ""
+access_date: 2026-08-03T18:54:19.022Z
+current_date: 2026-08-03T18:54:19.022Z
+---
+
+## SQL Delete
+
+You can delete all rows in the table:
+
+```typescript
+await db.delete(users);
+```
+
+And you can delete with filters and conditions:
+
+```typescript
+await db.delete(users).where(eq(users.name, 'Dan'));
+```
+
+### Limit
+
+Use `.limit()` to add `limit` clause to the query - for example:
+
+```typescript
+await db.delete(users).where(eq(users.name, 'Dan')).limit(2);
+```
+```sql
+delete from \`users\` where \`users\`.\`name\` = ? limit ?;
+```
+
+### Order By
+
+Use `.orderBy()` to add `order by` clause to the query, sorting the results by the specified fields:
+
+```typescript
+import { asc, desc } from 'drizzle-orm';
+
+await db.delete(users).where(eq(users.name, 'Dan')).orderBy(users.name);
+await db.delete(users).where(eq(users.name, 'Dan')).orderBy(desc(users.name));
+
+// order by multiple fields
+await db.delete(users).where(eq(users.name, 'Dan')).orderBy(users.name, users.name2);
+await db.delete(users).where(eq(users.name, 'Dan')).orderBy(asc(users.name), desc(users.name2));
+```
+```sql
+delete from \`users\` where \`users\`.\`name\` = ? order by \`name\`;
+delete from \`users\` where \`users\`.\`name\` = ? order by \`name\` desc;
+
+delete from \`users\` where \`users\`.\`name\` = ? order by \`name\`, \`name2\`;
+delete from \`users\` where \`users\`.\`name\` = ? order by \`name\` asc, \`name2\` desc;
+```

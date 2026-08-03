@@ -1,0 +1,438 @@
+---
+url: https://orm.drizzle.team/docs/joins
+title: "Joins"
+description: ""
+access_date: 2026-08-03T18:54:19.022Z
+current_date: 2026-08-03T18:54:19.022Z
+---
+
+## Joins \[SQL\]
+
+Join clause in SQL is used to combine 2 or more tables, based on related columns between them. Drizzle ORM joins syntax is a balance between the SQL-likeness and type safety.
+
+## Join types
+
+Drizzle ORM has APIs for `INNER JOIN [LATERAL]`, `FULL JOIN`, `LEFT JOIN [LATERAL]`, `RIGHT JOIN`, `CROSS JOIN [LATERAL]`. Lets have a quick look at examples based on below table schemas:
+
+```typescript
+export const users = pgTable("users", {
+  id: serial().primaryKey(),
+  name: text().notNull(),
+  age: integer(),
+});
+
+export const pets = pgTable("pets", {
+  id: serial().primaryKey(),
+  name: text().notNull(),
+  ownerId: integer("owner_id")
+    .notNull()
+    .references(() => users.id),
+});
+```
+
+### Left Join
+
+```typescript
+const result = await db.select().from(users).leftJoin(pets, eq(users.id, pets.ownerId))
+```
+```sql
+select ... from "users" left join "pets" on "users"."id" = "pets"."owner_id"
+```
+```typescript
+// result type
+const result: {
+    users: {
+        id: number;
+        name: string;
+        age: number | null;
+    };
+    pets: {
+        id: number;
+        name: string;
+        ownerId: number;
+    } | null;
+}[];
+```
+
+### Left Join Lateral
+
+```typescript
+const subquery = db.select().from(pets).where(gte(users.age, 16)).as('userPets')
+const result = await db.select().from(users).leftJoinLateral(subquery, sql\`true\`)
+```
+```sql
+select ... from "users" left join lateral (select ... from "pets" where "users"."age" >= 16) "userPets" on true
+```
+```typescript
+// result type
+const result: {
+    users: {
+        id: number;
+        name: string;
+        age: number | null;
+    };
+    userPets: {
+        id: number;
+        name: string;
+        ownerId: number;
+    } | null;
+}[];
+```
+
+### Right Join
+
+```typescript
+const result = await db.select().from(users).rightJoin(pets, eq(users.id, pets.ownerId))
+```
+```sql
+select ... from "users" right join "pets" on "users"."id" = "pets"."owner_id"
+```
+```typescript
+// result type
+const result: {
+    users: {
+        id: number;
+        name: string;
+        age: number | null;
+    } | null;
+    pets: {
+        id: number;
+        name: string;
+        ownerId: number;
+    };
+}[];
+```
+
+### Inner Join
+
+```typescript
+const result = await db.select().from(users).innerJoin(pets, eq(users.id, pets.ownerId))
+```
+```sql
+select ... from "users" inner join "pets" on "users"."id" = "pets"."owner_id"
+```
+```typescript
+// result type
+const result: {
+    users: {
+        id: number;
+        name: string;
+        age: number | null;
+    };
+    pets: {
+        id: number;
+        name: string;
+        ownerId: number;
+    };
+}[];
+```
+
+### Inner Join Lateral
+
+```typescript
+const subquery = db.select().from(pets).where(gte(users.age, 16)).as('userPets')
+const result = await db.select().from(users).innerJoinLateral(subquery, sql\`true\`)
+```
+```sql
+select ... from "users" inner join lateral (select ... from "pets" where "users"."age" >= 16) "userPets" on true
+```
+```typescript
+// result type
+const result: {
+    users: {
+        id: number;
+        name: string;
+        age: number | null;
+    };
+    userPets: {
+        id: number;
+        name: string;
+        ownerId: number;
+    };
+}[];
+```
+
+### Full Join
+
+```typescript
+const result = await db.select().from(users).fullJoin(pets, eq(users.id, pets.ownerId))
+```
+```sql
+select ... from "users" full join "pets" on "users"."id" = "pets"."owner_id"
+```
+```typescript
+// result type
+const result: {
+    users: {
+        id: number;
+        name: string;
+        age: number | null;
+    } | null;
+    pets: {
+        id: number;
+        name: string;
+        ownerId: number;
+    } | null;
+}[];
+```
+
+### Cross Join
+
+```typescript
+const result = await db.select().from(users).crossJoin(pets)
+```
+```sql
+select ... from "users" cross join "pets"
+```
+```typescript
+// result type
+const result: {
+    users: {
+        id: number;
+        name: string;
+        age: number | null;
+    };
+    pets: {
+        id: number;
+        name: string;
+        ownerId: number;
+    };
+}[];
+```
+
+### Cross Join Lateral
+
+```typescript
+const subquery = db.select().from(pets).where(gte(users.age, 16)).as('userPets')
+const result = await db.select().from(users).crossJoinLateral(subquery)
+```
+```sql
+select ... from "users" cross join lateral (select ... from "pets" where "users"."age" >= 16) "userPets"
+```
+```typescript
+// result type
+const result: {
+    users: {
+        id: number;
+        name: string;
+        age: number | null;
+    };
+    userPets: {
+        id: number;
+        name: string;
+        ownerId: number;
+    };
+}[];
+```
+
+## Partial select
+
+If you need to select a particular subset of fields or to have a flat response type, Drizzle ORM supports joins with partial select and will automatically infer return type based on `.select({ ... })` structure.
+
+```typescript
+await db.select({
+  userId: users.id,
+  petId: pets.id,
+}).from(users).leftJoin(pets, eq(users.id, pets.ownerId))
+```
+```sql
+select "users"."id", "pets"."id" from "users" left join "pets" on "users"."id" = "pets"."owner_id"
+```
+```typescript
+// result type
+const result: {
+  userId: number;
+  petId: number | null;
+}[];
+```
+
+You might’ve noticed that `petId` can be null now, it’s because we’re left joining and there can be users without a pet.
+
+It’s very important to keep in mind when using `sql` operator for partial selection fields and aggregations when needed, you should to use `sql<type | null>` for proper result type inference, that one is on you!
+
+```typescript
+const result = await db.select({
+  userId: users.id,
+  petId: pets.id,
+  petName1: sql\`upper(${pets.name})\`,
+  petName2: sql<string | null>\`upper(${pets.name})\`,
+  //˄we should explicitly tell 'string | null' in type, since we're left joining that field
+}).from(users).leftJoin(pets, eq(users.id, pets.ownerId))
+```
+```sql
+select "users"."id", "pets"."id", upper("pets"."name"), upper("pets"."name")
+from "users" 
+left join "pets" on "users"."id" = "pets"."owner_id"
+```
+```typescript
+// result type
+const result: {
+  userId: number;
+  petId: number | null;
+  petName1: unknown;
+  petName2: string | null;
+}[];
+```
+
+To avoid plethora of nullable fields when joining tables with lots of columns we can utilise our **nested select object syntax**, our smart type inference will make whole object nullable instead of making all table fields nullable!
+
+```typescript
+await db.select({
+  userId: users.id,
+  userName: users.name,
+  pet: {
+    id: pets.id,
+    name: pets.name,
+    upperName: sql<string>\`upper(${pets.name})\`
+  }
+}).from(users).fullJoin(pets, eq(users.id, pets.ownerId))
+```
+```sql
+select ... from "users" full join "pets" on "users"."id" = "pets"."owner_id"
+```
+```typescript
+// result type
+const result: {
+    userId: number | null;
+    userName: string | null;
+    pet: {
+        id: number;
+        name: string;
+        upperName: string;
+    } | null;
+}[];
+```
+
+## Aliases & Selfjoins
+
+Drizzle ORM supports table aliases which comes really handy when you need to do selfjoins.
+
+Lets say you need to fetch users with their parents:
+
+index.ts
+
+schema.ts
+
+```typescript
+import { user } from "./schema";
+import { alias } from "drizzle-orm/pg-core";
+
+const parent = alias(user, "parent");
+const result = await db
+  .select()
+  .from(user)
+  .leftJoin(parent, eq(parent.id, user.parentId));
+```
+```sql
+select ... from "user" left join "user" "parent" on "parent"."id" = "user"."parent_id"
+```
+```typescript
+// result type
+const result: {
+    user: {
+        id: number;
+        name: string;
+        parentId: number;
+    };
+    parent: {
+        id: number;
+        name: string;
+        parentId: number;
+    } | null;
+}[];
+```
+
+## Aggregating results
+
+Drizzle ORM delivers name-mapped results from the driver without changing the structure.
+
+You’re free to operate with results the way you want, here’s an example of mapping many-one relational data:
+
+```typescript
+type User = typeof users.$inferSelect;
+type Pet = typeof pets.$inferSelect;
+
+const rows = await db
+  .select({
+    user: users,
+    pet: pets,
+  })
+  .from(users)
+  .leftJoin(pets, eq(users.id, pets.ownerId));
+
+const result = rows.reduce<Record<number, { user: User; pets: Pet[] }>>(
+  (acc, row) => {
+    const user = row.user;
+    const pet = row.pet;
+
+    if (typeof acc[user.id] === "undefined") {
+      acc[user.id] = { user, pets: [] };
+    }    
+
+    if (pet) {
+      acc[user.id]!.pets.push(pet);
+    }
+
+    return acc;
+  },
+  {}
+);
+
+// result type
+const result: Record<number, {
+    user: User;
+    pets: Pet[];
+}>;
+```
+
+## Many-to-one example
+
+```typescript
+import { pgTable, text, integer } from "drizzle-orm/pg-core";
+import { drizzle } from "drizzle-orm/node-postgres";
+
+const cities = pgTable("cities", {
+  id: integer().primaryKey(),
+  name: text(),
+});
+
+const users = pgTable("users", {
+  id: integer().primaryKey(),
+  name: text(),
+  cityId: integer("city_id").references(() => cities.id),
+});
+
+const db = drizzle(process.env.DATABASE_URL);
+
+const result = await db.select().from(cities).leftJoin(users, eq(cities.id, users.cityId));
+```
+
+## Many-to-many example
+
+```typescript
+const users = pgTable("users", {
+  id: integer().primaryKey(),
+  name: text(),
+});
+
+const chatGroups = pgTable("chat_groups", {
+  id: integer().primaryKey(),
+  name: text(),
+});
+
+const usersToChatGroups = pgTable("users_to_chat_groups", {
+  userId: integer("user_id")
+    .notNull()
+    .references(() => users.id),
+  groupId: integer("group_id")
+    .notNull()
+    .references(() => chatGroups.id),
+});
+
+// querying user group with id 1 and all the participants(users)
+await db.select()
+  .from(usersToChatGroups)
+  .leftJoin(users, eq(usersToChatGroups.userId, users.id))
+  .leftJoin(chatGroups, eq(usersToChatGroups.groupId, chatGroups.id))
+  .where(eq(chatGroups.id, 1));
+```
