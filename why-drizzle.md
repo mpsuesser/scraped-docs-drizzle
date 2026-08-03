@@ -2,8 +2,8 @@
 url: https://orm.drizzle.team/docs/why-drizzle
 title: "Why Drizzle"
 description: ""
-access_date: 2026-08-03T18:54:19.022Z
-current_date: 2026-08-03T18:54:19.022Z
+access_date: 2026-08-03T19:00:22.305Z
+current_date: 2026-08-03T19:00:22.305Z
 ---
 
 > Drizzle is a good friend who’s there for you when necessary and doesn’t bother when you need some space.

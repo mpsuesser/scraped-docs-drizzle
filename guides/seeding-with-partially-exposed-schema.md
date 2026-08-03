@@ -2,8 +2,8 @@
 url: https://orm.drizzle.team/docs/guides/seeding-with-partially-exposed-schema
 title: "Seeding With Partially Exposed Schema"
 description: ""
-access_date: 2026-08-03T18:54:19.022Z
-current_date: 2026-08-03T18:54:19.022Z
+access_date: 2026-08-03T19:00:22.305Z
+current_date: 2026-08-03T19:00:22.305Z
 ---
 
 ## Seeding Partially Exposed Tables with Foreign Key

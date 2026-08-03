@@ -2,8 +2,8 @@
 url: https://orm.drizzle.team/docs/sqlite/latest-releases
 title: "Latest Releases"
 description: ""
-access_date: 2026-08-03T18:54:19.022Z
-current_date: 2026-08-03T18:54:19.022Z
+access_date: 2026-08-03T19:00:22.305Z
+current_date: 2026-08-03T19:00:22.305Z
 ---
 
 Latest Releases[Drizzle ORM and Drizzle Kit v1.0.0-beta.2 release](../latest-releases/drizzle-orm-v1beta2.md)

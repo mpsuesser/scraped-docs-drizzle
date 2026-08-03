@@ -2,8 +2,8 @@
 url: https://orm.drizzle.team/docs/v0-v1-changes
 title: "V0 V1 Changes"
 description: ""
-access_date: 2026-08-03T18:54:19.022Z
-current_date: 2026-08-03T18:54:19.022Z
+access_date: 2026-08-03T19:00:22.305Z
+current_date: 2026-08-03T19:00:22.305Z
 ---
 
 ## Changes in v1

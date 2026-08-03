@@ -2,8 +2,8 @@
 url: https://orm.drizzle.team/docs/sqlite/tutorials/drizzle-with-vercel-edge-functions
 title: "Drizzle With Vercel Edge Functions"
 description: ""
-access_date: 2026-08-03T18:54:19.022Z
-current_date: 2026-08-03T18:54:19.022Z
+access_date: 2026-08-03T19:00:22.305Z
+current_date: 2026-08-03T19:00:22.305Z
 ---
 
 ## Drizzle with Vercel Edge Functions

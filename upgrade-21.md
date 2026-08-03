@@ -2,8 +2,8 @@
 url: https://orm.drizzle.team/docs/upgrade-21
 title: "Upgrade 21"
 description: ""
-access_date: 2026-08-03T18:54:19.022Z
-current_date: 2026-08-03T18:54:19.022Z
+access_date: 2026-08-03T19:00:22.305Z
+current_date: 2026-08-03T19:00:22.305Z
 ---
 
 ## How to migrate to 0.21.0

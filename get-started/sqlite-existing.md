@@ -2,8 +2,8 @@
 url: https://orm.drizzle.team/docs/get-started/sqlite-existing
 title: "Sqlite Existing"
 description: ""
-access_date: 2026-08-03T18:54:19.022Z
-current_date: 2026-08-03T18:54:19.022Z
+access_date: 2026-08-03T19:00:22.305Z
+current_date: 2026-08-03T19:00:22.305Z
 ---
 
 ## Get Started with Drizzle and SQLite in existing project

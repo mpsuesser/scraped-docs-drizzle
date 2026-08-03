@@ -2,8 +2,8 @@
 url: https://orm.drizzle.team/docs/mssql/guides/d1-http-with-drizzle-kit
 title: "D1 Http With Drizzle Kit"
 description: ""
-access_date: 2026-08-03T18:54:19.022Z
-current_date: 2026-08-03T18:54:19.022Z
+access_date: 2026-08-03T19:00:22.305Z
+current_date: 2026-08-03T19:00:22.305Z
 ---
 
 ## Cloudflare D1 HTTP API with Drizzle Kit

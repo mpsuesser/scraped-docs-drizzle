@@ -2,8 +2,8 @@
 url: https://orm.drizzle.team/docs/mysql/upgrade-v1
 title: "Upgrade V1"
 description: ""
-access_date: 2026-08-03T18:54:19.022Z
-current_date: 2026-08-03T18:54:19.022Z
+access_date: 2026-08-03T19:00:22.305Z
+current_date: 2026-08-03T19:00:22.305Z
 ---
 
 ## Upgrading to Drizzle v1

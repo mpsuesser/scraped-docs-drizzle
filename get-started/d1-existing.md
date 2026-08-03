@@ -2,8 +2,8 @@
 url: https://orm.drizzle.team/docs/get-started/d1-existing
 title: "D1 Existing"
 description: ""
-access_date: 2026-08-03T18:54:19.022Z
-current_date: 2026-08-03T18:54:19.022Z
+access_date: 2026-08-03T19:00:22.305Z
+current_date: 2026-08-03T19:00:22.305Z
 ---
 
 ## Get Started with Drizzle and D1 in existing project
