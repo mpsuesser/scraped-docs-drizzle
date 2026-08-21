@@ -2,8 +2,8 @@
 url: https://orm.drizzle.team/docs/sqlite/drizzle-kit-studio
 title: "Drizzle Kit Studio"
 description: ""
-access_date: 2026-08-03T19:43:09.006Z
-current_date: 2026-08-03T19:43:09.006Z
+access_date: 2026-08-21T14:34:37.254Z
+current_date: 2026-08-21T14:34:37.254Z
 ---
 
 ## drizzle-kit studio
@@ -58,36 +58,15 @@ Safari and Brave block access to localhost by default. You need to install [mkce
 2. Run `mkcert -install`
 3. Restart your `drizzle-kit studio`
 
-### Embeddable version of Drizzle Studio
+### Other flavours of Drizzle Studio
 
-While hosted version of Drizzle Studio for local development is free forever and meant to just enrich Drizzle ecosystem, we have a B2B offering of an embeddable version of Drizzle Studio for businesses.
-
-**Drizzle Studio component** - is a pre-bundled framework agnostic web component of Drizzle Studio which you can embed into your UI `React` `Vue` `Svelte` `VanillaJS` etc.
-
-That is an extremely powerful UI element that can elevate your offering if you provide Database as a SaaS or a data centric SaaS solutions based on SQL or for private non-customer facing in-house usage.
-
-Database platforms using Drizzle Studio:
-
-- [Turso](https://turso.tech/), our first customers since Oct 2023!
-- [Neon](https://neon.tech/), [launch post](https://neon.tech/docs/changelog/2024-05-24)
-- [Hydra](https://www.hydra.so/)
-
-Data centric platforms using Drizzle Studio:
-
-- [Nuxt Hub](https://hub.nuxt.com/), Sébastien Chopin’s [launch post](https://x.com/Atinux/status/1768663789832929520)
-- [Deco.cx](https://deco.cx/)
-
-You can read a detailed overview [here](https://www.npmjs.com/package/@drizzle-team/studio) and if you’re interested - hit us in DMs on [Twitter](https://x.com/drizzleorm) or in [Discord #drizzle-studio](https://driz.link/discord) channel.
-
-### Drizzle Studio chrome extension
-
-Drizzle Studio [chrome extension](https://chromewebstore.google.com/detail/drizzle-studio/mjkojjodijpaneehkgmeckeljgkimnmd) lets you browse your [PlanetScale](https://planetscale.com/), [Cloudflare](https://developers.cloudflare.com/d1/) and [Vercel Postgres](https://vercel.com/docs/storage/vercel-postgres) serverless databases directly in their vendor admin panels!
+Apart from `drizzle-kit studio` for local development, Drizzle Studio also comes as a self-hosted Drizzle Gateway, a Chrome extension for serverless database vendors and an embeddable component for your own product — check out the [Drizzle Studio overview](https://orm.drizzle.team/drizzle-studio/overview).
 
 ### Limitations
 
 Our hosted version Drizzle Studio is meant to be used for local development and not meant to be used on remote (VPS, etc).
 
-If you want to deploy Drizzle Studio to your VPS - we have an alpha version of Drizzle Studio Gateway, hit us in DMs on [Twitter](https://x.com/drizzleorm) or in [Discord #drizzle-studio](https://driz.link/discord) channel.
+If you want to deploy Drizzle Studio to your VPS — that’s what [Drizzle Gateway](https://orm.drizzle.team/drizzle-studio/overview#drizzle-gateway) is for.
 
 ### Is it open source?
 
