@@ -2,8 +2,8 @@
 url: https://orm.drizzle.team/docs/sqlite/tutorials/bun-railway-pg
 title: "Bun Railway Pg"
 description: ""
-access_date: 2026-08-03T19:43:09.006Z
-current_date: 2026-08-03T19:43:09.006Z
+access_date: 2026-08-27T16:48:15.483Z
+current_date: 2026-08-27T16:48:15.483Z
 ---
 
 ## Drizzle with Bun and PostgreSQL on Railway
@@ -43,9 +43,19 @@ On the project canvas, click the `New` button in the top right corner and select
 
 ![](https://orm.drizzle.team/_astro/railway-select-postgres.CyJphHAC_ZIczs6.webp)
 
+#### Enable public access on the database
+
+By default, Railway keeps the database on the private network, so you cannot reach it from your machine. Click on the PostgreSQL service, go to the `Settings` tab, find the `Networking` section, and click `Add Public Access`.
+
+![](https://orm.drizzle.team/_astro/railway-add-public-access.TUfgMPO5_Z16N3qi.webp)
+
+Then click `Deploy` in the top bar to apply the change. Railway adds a public host and port, and sets the `DATABASE_PUBLIC_URL` variable on the service.
+
+![](https://orm.drizzle.team/_astro/railway-add-public-access-apply.NFI4rL7q_KUN72.webp)
+
 #### Get your connection string
 
-Click on the PostgreSQL service in your project, go to the `Variables` tab, and find the `DATABASE_PUBLIC_URL` variable. Copy the value — it should look similar to this:
+Go to the `Variables` tab of the PostgreSQL service and find the `DATABASE_PUBLIC_URL` variable. Copy the value — it should look similar to this:
 
 ```bash
 postgresql://postgres:password@region.railway.app:port/railway
@@ -325,7 +335,27 @@ For more details, see the [Drizzle migrations fundamentals](../../migrations.md)
 
 ## Deploy Drizzle Studio to Railway
 
-You can deploy [Drizzle Studio](https://orm.drizzle.team/drizzle-studio/overview) alongside your application on Railway to browse and manage your database directly from the browser. You can use the [Drizzle Studio Railway template](https://railway.com/deploy/drizzle-studio-1) or follow the steps below.
+You can deploy [Drizzle Studio](https://orm.drizzle.team/drizzle-studio/overview) alongside your application on Railway to browse and manage your database directly from the browser.
+
+### Option 1: one-click deployment (recommended)
+
+[![Deploy on Railway](https://railway.com/button.svg)](https://railway.com/new/template/drizzle-studio-1?referralCode=eobqmj&utm_medium=integration&utm_source=button&utm_campaign=drizzle-studio-1)
+
+#### Choose your Railway project
+
+Open the `Deploy to` dropdown and select the project that holds your PostgreSQL database. Deploying into the same project lets Drizzle Studio reference the database variables.
+
+![](https://orm.drizzle.team/_astro/railway-deploy-drizzle-studio-project.D7oVsULy_Z1vLj6o.webp)
+
+#### Set the database connection string
+
+Click `Configure`, set the `DATABASE_URL` variable to `${{Postgres.DATABASE_URL}}` to reference your existing PostgreSQL service, and click `Save Config`. Then click `Review and deploy`.
+
+![](https://orm.drizzle.team/_astro/railway-deploy-drizzle-studio-env.DLgK9Z2w_Zro2ie.webp)
+
+### Option 2: manual deployment
+
+Show the manual steps
 
 #### Add a new service from a template
 
@@ -341,24 +371,39 @@ Search for `drizzle studio` and select the **Drizzle Studio** template by Drizzl
 
 #### Configure environment variables and deploy
 
-The template comes with two pre-configured environment variables:
+The template comes with three pre-configured environment variables:
 
 - `PASSCODE` - the password for secure access to your Studio instance. It defaults to `${{secret()}}`, which generates a random secret.
 - `DATABASE_URL` - the database connection string. Set it to `${{Postgres.DATABASE_URL}}` to reference your existing PostgreSQL service.
+- `PORT` - the port Drizzle Studio listens on. It defaults to `4983`. Leave it as it is.
 
 Click `Deploy Template` to deploy.
 
 ![](https://orm.drizzle.team/_astro/railway-drizzle-studio-template-config.BvbbcNyq_zsmNv.webp)
 
+### After deployment
+
 #### Find your Drizzle Studio URL
 
 Once deployed, click on the Drizzle Studio service in your project, go to the `Settings` tab, and scroll down to the `Networking` section. You will find your public domain under **Public Networking**.
 
-![](https://orm.drizzle.team/_astro/railway-drizzle-studio-networking.CAEy84Yo_1RuCzP.webp)
+![](https://orm.drizzle.team/_astro/railway-drizzle-studio-networking.Yf-GqdKv_1I8dnz.webp)
+
+#### Enter the passcode
+
+Open the Drizzle Studio URL in your browser. On the first visit it asks for a passcode.
+
+![](https://orm.drizzle.team/_astro/railway-drizzle-studio-passcode-request.BsRdtiv0_2nsikq.webp)
+
+Go back to the Drizzle Studio service in Railway, open the `Variables` tab, and copy the value of the `PASSCODE` variable. The template generates it for you, so it is different for every deployment.
+
+![](https://orm.drizzle.team/_astro/railway-drizzle-studio-passcode.WNDU7fZe_Z1tbO1P.webp)
+
+Paste the value into the prompt and click `Continue`.
 
 #### Browse your database with Drizzle Studio
 
-Open the Drizzle Studio URL in your browser. You should see your database tables and can browse, filter, and edit data directly.
+You should now see your database tables and can browse, filter, and edit data directly.
 
 ![](https://orm.drizzle.team/_astro/drizzle-studio-posts-table.Bzl9irRq_Z13Lyt6.webp)
 
