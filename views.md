@@ -2,8 +2,8 @@
 url: https://orm.drizzle.team/docs/views
 title: "Views"
 description: ""
-access_date: 2026-08-03T19:43:09.006Z
-current_date: 2026-08-03T19:43:09.006Z
+access_date: 2026-08-31T11:52:40.371Z
+current_date: 2026-08-31T11:52:40.371Z
 ---
 
 ## Views
@@ -165,7 +165,7 @@ export const newYorkers = pgView('new_yorkers')
 
 // materialized view
 export const newYorkers2 = pgMaterializedView('new_yorkers_2')
-  .using('btree')
+  .using('heap')
   .with({
     fillfactor: 90,
     toastTupleTarget: 0.5,
@@ -214,7 +214,7 @@ WITH
             "sq"."homeCity" = 1
     );
 
-CREATE MATERIALIZED VIEW "new_yorkers_2" USING "btree"
+CREATE MATERIALIZED VIEW "new_yorkers_2" USING "heap"
 WITH
     (autovacuum_enabled = TRUE, fillfactor = 90, toast_tuple_target = 0.5) TABLESPACE custom_tablespace AS (
         WITH
