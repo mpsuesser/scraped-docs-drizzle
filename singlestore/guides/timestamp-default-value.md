@@ -2,8 +2,8 @@
 url: https://orm.drizzle.team/docs/singlestore/guides/timestamp-default-value
 title: "Timestamp Default Value"
 description: ""
-access_date: 2026-08-03T19:43:09.006Z
-current_date: 2026-08-03T19:43:09.006Z
+access_date: 2026-09-01T17:39:09.775Z
+current_date: 2026-09-01T17:39:09.775Z
 ---
 
 ## SQL Timestamp as a default value
@@ -237,7 +237,7 @@ export const users = sqliteTable('users', {
     .default(sql\`(unixepoch())\`),
   timestamp2: integer('timestamp2', { mode: 'timestamp_ms' })
     .notNull()
-    .default(sql\`(unixepoch() * 1000)\`),
+    .default(sql\`(unixepoch('subsecond') * 1000)\`),
   timestamp3: integer('timestamp3', { mode: 'number' })
     .notNull()
     .default(sql\`(unixepoch())\`),
@@ -247,7 +247,7 @@ export const users = sqliteTable('users', {
 CREATE TABLE \`users\` (
     \`id\` integer PRIMARY KEY NOT NULL,
     \`timestamp1\` integer DEFAULT (unixepoch()) NOT NULL,
-    \`timestamp2\` integer DEFAULT (unixepoch() * 1000) NOT NULL,
+    \`timestamp2\` integer DEFAULT (unixepoch('subsecond') * 1000) NOT NULL,
     \`timestamp3\` integer DEFAULT (unixepoch()) NOT NULL
 );
 ```
@@ -259,7 +259,7 @@ The `mode` option defines how values are handled in the application. In the appl
 +------------+------------+---------------+------------+
 | id         | timestamp1 | timestamp2    | timestamp3 |
 +------------+------------+---------------+------------+
-| 1          | 1712835640 | 1712835640000 | 1712835640 |
+| 1          | 1712835640 | 1712835640469 | 1712835640 |
 +------------+------------+---------------+------------+
 ```
 ```ts
@@ -268,7 +268,7 @@ The `mode` option defines how values are handled in the application. In the appl
   {
     id: 1,
     timestamp1: 2024-04-11T11:40:40.000Z, // Date object
-    timestamp2: 2024-04-11T11:40:40.000Z, // Date object
+    timestamp2: 2024-04-11T11:40:40.469Z, // Date object
     timestamp3: 1712835640 // number
   }
 ]
