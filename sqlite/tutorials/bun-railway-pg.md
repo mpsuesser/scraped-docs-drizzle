@@ -2,8 +2,8 @@
 url: https://orm.drizzle.team/docs/sqlite/tutorials/bun-railway-pg
 title: "Bun Railway Pg"
 description: ""
-access_date: 2026-08-27T16:48:15.483Z
-current_date: 2026-08-27T16:48:15.483Z
+access_date: 2026-09-17T14:21:39.181Z
+current_date: 2026-09-17T14:21:39.181Z
 ---
 
 ## Drizzle with Bun and PostgreSQL on Railway
@@ -39,7 +39,7 @@ Log in to your [Railway dashboard](https://railway.app/dashboard) and click the 
 
 #### Provision a PostgreSQL database
 
-On the project canvas, click the `New` button in the top right corner and select `Database` → `PostgreSQL`. You can also use the command palette (`Cmd/Ctrl + K`) and search for PostgreSQL. Railway will provision a new PostgreSQL instance for you.
+On the project canvas, click the `New` button in the top right corner and select `Database` → `PostgreSQL`. You can also use the command palette ( ⌘ K Ctrl K ) and search for PostgreSQL. Railway will provision a new PostgreSQL instance for you.
 
 ![](https://orm.drizzle.team/_astro/railway-select-postgres.CyJphHAC_ZIczs6.webp)
 

@@ -2,21 +2,24 @@
 url: https://orm.drizzle.team/docs/sqlite/tutorials/railway-postgres-tailscale
 title: "Railway Postgres Tailscale"
 description: ""
-access_date: 2026-08-27T16:48:15.483Z
-current_date: 2026-08-27T16:48:15.483Z
+access_date: 2026-09-17T14:21:39.181Z
+current_date: 2026-09-17T14:21:39.181Z
 ---
 
 ## Connect Drizzle Kit to a private Railway database with Tailscale
 
-This tutorial runs a PostgreSQL database on [Railway](https://driz.link/railway) with public access turned off, and connects `drizzle-kit` to it from your machine.
+This tutorial connects `drizzle-kit` on your device to a PostgreSQL database on [Railway](https://driz.link/railway) that has public access turned off.
 
-A [Tailscale](https://tailscale.com/) Forwarder joins your tailnet and forwards the database port into Railway’s private network. Nothing is exposed to the public internet, and every device on your tailnet can run migrations against the database.
+You add a [Tailscale](https://tailscale.com/) service to the project that holds the database. Every device on your tailnet can then access the database.
+
+If you also want a database UI on your tailnet, start with [Drizzle Studio and Gateway on Railway with Tailscale](../../tutorials/railway-studio-tailscale.md). Its templates come with the same Tailscale service.
 
 This guide assumes the following:
 
 - You have a [Railway](https://driz.link/railway) account.
 - You have a [Tailscale](https://tailscale.com/) account.
-- You have the Tailscale client installed on the machine you work from, and that machine is signed in to your tailnet. You can find the downloads on the [Tailscale website](https://tailscale.com/download).
+- You have the Tailscale client installed on the device you work from, and that device is signed in to your tailnet. You can find the downloads on the [Tailscale website](https://tailscale.com/download).
+- MagicDNS is on in your tailnet, so that the machine name resolves. Tailnets created on or after 2022-10-20 have it on by default. If your tailnet is older, check the [DNS page](https://login.tailscale.com/admin/dns).
 - You have installed Drizzle ORM and [Drizzle Kit](../../kit-overview.md).
 
 ```shell
@@ -26,115 +29,125 @@ npm i -D drizzle-kit@rc
 
 ## How it works
 
-Railway gives every service a private domain that ends in `.railway.internal`. Those domains resolve only inside the project, so `drizzle-kit` on your machine cannot use them.
+Railway gives every service a private domain that ends in `.railway.internal`. Those domains resolve only inside the project, so `drizzle-kit` on your device cannot use them.
 
-The Tailscale Forwarder solves that from both sides. It runs as a service in the same Railway project, so it resolves the private domains. It also joins your tailnet as a machine, so your own devices reach it by its tailnet name. Traffic goes from `drizzle-kit` over the tailnet to the forwarder, and from the forwarder to the database over Railway’s private network.
+The Tailscale service connects the two networks. It runs in the same Railway project, so it resolves the private domains. It also joins your tailnet as a machine, so your own devices reach it by its machine name. Traffic goes from `drizzle-kit` over the tailnet to that machine, and from there to the database over Railway’s private network.
 
-![](https://orm.drizzle.team/_astro/railway-postgres-tailscale-diagram-light.5GKar08z_Z2p4nFL.webp) ![](https://orm.drizzle.team/_astro/railway-postgres-tailscale-diagram-dark.BgsFEVKQ_200Dfn.webp)
+![drizzle-kit reaches the Tailscale service over the tailnet. Inside the Railway private network, the Tailscale service reaches Postgres.](https://orm.drizzle.team/_astro/railway-tailscale-database-diagram-light.pZY2FajC_zAt4J.webp)
 
 ## Set up the Railway project
+
+Create a project with a PostgreSQL database that has no public access. If your project already has a database, skip to [Add the Tailscale service](#add-the-tailscale-service).
 
 #### Create a Railway project
 
 Log in to your [Railway dashboard](https://railway.app/dashboard) and click the `New Project` button.
 
-![](https://orm.drizzle.team/_astro/railway-create-service-menu.CGwVzlVj_ZHpEVP.webp)
+![Railway create menu with Database selected](https://orm.drizzle.team/_astro/railway-create-service-menu.CGwVzlVj_ZHpEVP.webp)
 
 #### Provision a PostgreSQL database
 
-On the project canvas, click the `New` button in the top right corner and select `Database` → `PostgreSQL`. You can also use the command palette (`Cmd/Ctrl + K`) and search for PostgreSQL.
+On the project canvas, click the `New` button in the top right corner and select `Database` → `PostgreSQL`. You can also use the command palette ( ⌘ K Ctrl K ) and search for PostgreSQL.
 
-![](https://orm.drizzle.team/_astro/railway-select-postgres.CyJphHAC_ZIczs6.webp)
+![Railway database menu with PostgreSQL selected](https://orm.drizzle.team/_astro/railway-select-postgres.CyJphHAC_ZIczs6.webp)
 
 #### Keep the database on the private network
 
-Click on the PostgreSQL service, go to the `Settings` tab, and find the `Networking` section. Verify that public access is disabled. Under `Private Networking` you will see the private domain of the service, for example `postgres.railway.internal`. The forwarder will use that domain.
+Click on the PostgreSQL service, go to the `Settings` tab, and find the `Networking` section. Verify that public access is disabled. Under `Private Networking` you will see the private domain of the service, for example `postgres.railway.internal`.
 
-![](https://orm.drizzle.team/_astro/railway-postgres-private-networking.2NwPiIFJ_Z1WT18O.webp)
+![Postgres Settings tab with no public access and the private domain postgres.railway.internal](https://orm.drizzle.team/_astro/railway-postgres-private-networking.2NwPiIFJ_Z1WT18O.webp)
 
-## Add the database to your tailnet
+## Add the Tailscale service
 
-#### Check MagicDNS and HTTPS certificates
+Deploy the Tailscale for Drizzle template into the project that holds your database.
 
-Open the [DNS page](https://login.tailscale.com/admin/dns) in the Tailscale admin console. Both **MagicDNS** and **HTTPS Certificates** must be enabled. Each section offers the opposite action, so a button that reads `Disable MagicDNS...` means MagicDNS is already on.
+If your project already runs `Drizzle Studio with Tailscale` or `Drizzle Gateway with Tailscale` template, it already has a Tailscale service, and you can skip this section. Open that Tailscale service, go to the `Variables` tab, and set `TS_FORWARD_DATABASE`: type `${{` and pick `RAILWAY_PRIVATE_DOMAIN` of your database service. Click `Deploy` in the top bar and wait for `5432: ready` in the new deploy log. The machine name is the first part of the address in the `open` line, for example `drizzle-studio`.
 
-MagicDNS gives the forwarder a stable machine name, which the database connection needs. HTTPS certificates are not needed for the database connection, but they are needed to open a browser UI over the forwarder, and both settings live on this page.
+#### Open the template
 
-![](https://orm.drizzle.team/_astro/tailscale-dns-magicdns-https.B7RbkVw2_pKPF8.webp)
+Press the button below to open the Tailscale for Drizzle template.
 
-#### Create a reusable auth key
+**Don’t deploy it right away.** Set the variables first.
 
-Go to the [Keys page](https://login.tailscale.com/admin/settings/keys) in the settings menu and click `Generate auth key`. Add a description and turn on `Reusable`. Leave the other settings as they are. A reusable key lets the forwarder register itself again when it starts without existing state.
+[![Deploy on Railway](https://railway.com/button.svg)](https://railway.com/new/template/tailscale-for-drizzle?referralCode=eobqmj&utm_medium=integration&utm_source=button&utm_campaign=tailscale-for-drizzle)
 
-![](https://orm.drizzle.team/_astro/tailscale-generate-auth-key.CXe6lSd__ZqEHR4.webp)
+Open the `Deploy to` dropdown and select the project that holds your database.
 
-Click `Generate key`. Copy the key now, because the admin console shows it only once.
+![Tailscale for Drizzle deploy form with TS_FORWARD_DATABASE set to the Postgres private domain and TS_HOSTNAME set to railway-postgres](https://orm.drizzle.team/_astro/railway-tailscale-database-template-form.Cntu72XE_SS5fO.webp)
 
-![](https://orm.drizzle.team/_astro/tailscale-auth-key-created.3CktNE2S_Z1aH9cK.webp)
+#### Set the variables
 
-#### Deploy the Tailscale Forwarder
+| Variable | What to set |
+| --- | --- |
+| `TS_FORWARD_DATABASE` | The field is empty. Pick your database service from the list, then pick `RAILWAY_PRIVATE_DOMAIN`. For a service named `Postgres` the field then reads `${{Postgres.RAILWAY_PRIVATE_DOMAIN}}`. |
+| `TS_HOSTNAME` | Change it to `railway-postgres`, or pick another name for the machine. You connect to the database by this name. |
 
-The Tailscale Forwarder is a small TCP proxy. It joins your tailnet as a machine and forwards ports on that machine to services on the Railway private network. Railway publishes the template, and it runs the `brody192/tailscale-forwarder` image.
+Some variables, such as `TS_HOSTNAME`, are in the collapsed `Pre-Configured Environment Variables` section of the card. Expand it to see or change them.
 
-[![Deploy on Railway](https://railway.com/button.svg)](https://railway.com/deploy/tailscale-forwarder)
+#### Deploy the template
 
-Open the `Deploy to` dropdown and select the project that holds your database. Both services must be in the same project, otherwise the forwarder won’t be able to reach the database over the private network, since it will be placed on a different private network.
+On the service card, click `Save Config`. Then click `Review and deploy`. Railway opens your project with the template in a side panel. Click `Deploy Template` there.
 
-Paste your auth key into `TS_AUTHKEY`. Then set `CONNECTION_MAPPING_01` to the database mapping. The format is `[https:]<source port>:<target host>:<target port>`.
+#### Sign in from the deploy log
+
+Open the `Tailscale` service, then its `Deployments` tab, and read the deploy log. The last lines of the log hold a sign-in link:
 
 ```plaintext
-5432:${{Postgres.RAILWAY_PRIVATE_DOMAIN}}:${{Postgres.PGPORT}}
+This service is not on your tailnet yet. Open this link and sign in
+with the account that owns your tailnet:
+  https://login.tailscale.com/a/xxxxxxxxxxxx
 ```
 
-This forwards port `5432` on the forwarder to your database.
+Open the link and sign in. Anyone who opens that link first gets this machine on their tailnet, so do not forward it. The log is visible only to members of your Railway project.
 
-![](https://orm.drizzle.team/_astro/railway-tailscale-forwarder-template-config.Dtw36ieS_Z2w6GtM.webp)
+![Tailscale deploy log with the sign-in message and a hidden link](https://orm.drizzle.team/_astro/railway-tailscale-signin-log.ClF8PJDM_Z27w11o.webp)
 
-The template setup screen shows only the variables the template declares, and you cannot add new ones there. `CONNECTION_MAPPING_01` is the only mapping you can set now. You add further mappings on the service itself, after it exists.
+If your tailnet requires device approval, the log says so and the machine waits until you approve it on the [Machines page](https://login.tailscale.com/admin/machines).
 
-#### Deploy and check the logs
+#### Check the forwarding rule
 
-Click `Deploy`. The template attaches a volume and sets `TS_EPHEMERAL=false`, so the machine keeps the same identity across redeploys instead of registering a duplicate.
+A few seconds after you sign in, the same log prints:
 
-Open the `Deployments` tab and read the deploy logs. Three lines tell you the forwarder started correctly:
+```plaintext
+joined tailnet: example.com
+5432: ready
+```
 
-- `tsnet starting with hostname "..."` gives the machine name on your tailnet. You need it in a later step.
-- `Starting tailscale_fwdr` lists what it parsed, including `ts-ephemeral: false` and the source port, target address and target port of each mapping.
-- `listening for connections` confirms the forwarder accepts traffic on that source port.
+![Tailscale deploy log with the joined tailnet and 5432 ready lines](https://orm.drizzle.team/_astro/railway-tailscale-database-log.CI6_wEaV_2jblMc.webp)
 
-![](https://orm.drizzle.team/_astro/railway-tailscale-forwarder-logs.BzPtusak_1Q6z2n.webp)
+Check that the tailnet name is yours. If it is not, someone else opened the sign-in link first, and their tailnet can now reach this service. To take the service back:
 
-#### Copy the forwarder domain
+1. On the project canvas, click the volume under the Tailscale service, open its `Settings` tab, and click `Wipe volume`.
+2. Type the confirmation text and click `Wipe`. Railway deletes the machine’s key and redeploys the service.
+3. Open the sign-in link from the new deploy log yourself.
+4. Change the database user’s password.
 
-`TS_HOSTNAME` defaults to your project name, environment name and service name joined by dashes, for example `my-project-production-tailscale-forwarder`. The deploy log prints it on the `tsnet starting with hostname` line.
+#### Find the machine name
 
-Open the [Machines page](https://login.tailscale.com/admin/machines) in the Tailscale admin console. The forwarder appears there on its own once it starts with a valid auth key.
+Open the [Machines page](https://login.tailscale.com/admin/machines). The new machine has the name you set in `TS_HOSTNAME`. If your tailnet already had a machine with that name, the new name ends in `-1`, `-2` and so on. Use the name that the Machines page shows.
 
-![](https://orm.drizzle.team/_astro/tailscale-machines-forwarder.7qHmxVbZ_Z29ufOO.webp)
+## Connect Drizzle Kit from your device
 
-Click the machine to open its page. Under `Machine Details`, copy the `Full domain` value. That is the host you connect to from your machine.
-
-![](https://orm.drizzle.team/_astro/tailscale-machine-full-domain.Dbyeapim_Z1USs6p.webp)
-
-## Connect Drizzle Kit from your machine
-
-IMPORTANT
-
-The machine you run `drizzle-kit` on must be signed in to the same tailnet as the forwarder, because the database connection is routed through it.
+Point `drizzle-kit` at the machine name and apply your schema.
 
 #### Set the connection string
 
 Open the PostgreSQL service in Railway, go to the `Variables` tab, and copy `DATABASE_URL`.
 
-![](https://orm.drizzle.team/_astro/railway-postgres-database-url.BJ_Jex_d_29LfvM.webp)
+![Postgres Variables tab with DATABASE_URL marked](https://orm.drizzle.team/_astro/railway-postgres-database-url.BJ_Jex_d_29LfvM.webp)
 
-Replace the `***.railway.internal` host with the [Tailscale forwarder’s domain](#copy-the-forwarder-domain) and keep the rest of the string. `railway.internal` cannot be resolved on a machine outside Railway, so you need to connect through the Tailscale forwarder. Put the result in a `.env` file.
+Replace the `***.railway.internal` host with the machine name and keep the rest of the string. Put the result in a `.env` file:
 
 ```plaintext
-DATABASE_URL=postgresql://postgres:password@<full-domain>:5432/railway
+DATABASE_URL=postgresql://postgres:PASSWORD@MACHINE_NAME:5432/railway
 ```
 
-Tailscale encrypts the connection between your machine and the forwarder, and Railway encrypts the hop between the forwarder and the database. Railway’s PostgreSQL also accepts TLS through the forwarder, so most clients connect with their default settings.
+Replace the following:
+
+- `PASSWORD`: the password from the `DATABASE_URL` that you copied
+- `MACHINE_NAME`: the machine name from the Machines page, for example `railway-postgres`
+
+Tailscale encrypts the connection between your device and the Tailscale service, and Railway encrypts the hop between the Tailscale service and the database. Railway’s PostgreSQL also accepts TLS through the Tailscale service, so most clients connect with their default settings.
 
 #### Set up the Drizzle config file
 
@@ -164,9 +177,9 @@ npx drizzle-kit generate
 npx drizzle-kit migrate
 ```
 
-For rapid prototyping you can push the schema directly with [drizzle-kit push](../../kit-overview.md#prototyping-with-db-push). For production deployments, prefer the `generate` and `migrate` workflow, so you keep a versioned history of schema changes. See the [Drizzle migrations fundamentals](../../migrations.md) page for details.
+For rapid prototyping you can push the schema directly with [drizzle-kit push](../../drizzle-kit-push.md). For production deployments, prefer the `generate` and `migrate` workflow, so you keep a versioned history of schema changes. See the [Drizzle migrations fundamentals](../../migrations.md) page for details.
 
-#### Check the result
+#### Check the tables in Drizzle Studio
 
 Open the database in [Drizzle Studio](../../drizzle-kit-studio.md):
 
@@ -174,26 +187,86 @@ Open the database in [Drizzle Studio](../../drizzle-kit-studio.md):
 npx drizzle-kit studio
 ```
 
-It runs on your machine and reads the same `DATABASE_URL`, so it reaches the database through the forwarder. Your new tables are there.
+It runs on your device and reads the same `DATABASE_URL`, so it reaches the database through the Tailscale service. Your new tables are there.
 
-![](https://orm.drizzle.team/_astro/drizzle-studio-posts-table.Bzl9irRq_Z13Lyt6.webp)
+![Drizzle Studio with the posts and users tables](https://orm.drizzle.team/_astro/drizzle-studio-posts-table.Bzl9irRq_Z13Lyt6.webp)
 
-For occasional access you do not need Tailscale at all. The Railway CLI opens a temporary tunnel to a private database with `railway connect Postgres --tunnel-only`. A forwarder is the right tool when you need a permanent route, or access from every device on your tailnet.
+For occasional access you do not need Tailscale at all. The Railway CLI opens a temporary tunnel to a private database with `railway connect Postgres --tunnel-only`. If you need a permanent route, or access from every device on your tailnet, use the Tailscale service.
+
+## Use other ports
+
+By default, `TS_FORWARD_DATABASE` uses port 5432, on the machine and on the database service. To use other ports, write the value in the form `[port:]host[:port]`:
+
+| Value | Port on the machine | Port on the service |
+| --- | --- | --- |
+| `host` | The default port | The default port |
+| `host:port` | `port` | `port` |
+| `source_port:host:target_port` | `source_port` | `target_port` |
+
+For example, `5433:${{Postgres.RAILWAY_PRIVATE_DOMAIN}}:5432` forwards port 5433 on the machine to port 5432 of the database service. Your connection string then uses port 5433.
+
+## Disable key expiry
+
+A machine that joined by signing in has its key expire on your tailnet’s schedule, 180 days by default. When that happens, the Tailscale service prints a new sign-in link and waits. The machine is unreachable until you click it.
+
+To avoid that, open the [Machines page](https://login.tailscale.com/admin/machines) once, find the machine, open the menu at the far right of its row, and choose `Disable key expiry`.
+
+![Tailscale Machines page menu with Disable key expiry](https://orm.drizzle.team/_astro/tailscale-machines-disable-key-expiry.CpBnGkG0_1Jf6GJ.webp)
+
+If you automate deployments and want no sign-in at all, set `TS_AUTHKEY` on the Tailscale service:
+
+- For an auth key, set `TS_AUTHKEY` to the key.
+- For an OAuth client secret, set `TS_AUTHKEY` to the secret with `?ephemeral=false&preauthorized=true` appended. Without that suffix, Tailscale removes the machine when it disconnects, and the machine waits for approval before it joins. Also set `TS_TAGS` to a tag you own, for example `tag:drizzle`. A tagged machine never has its key expire.
+
+The Tailscale service reads `TS_AUTHKEY` only before the machine joins. If the machine has already joined, remove the machine and wipe the volume first.
+
+## Troubleshoot the Tailscale setup
+
+Open the entry that matches what you see.
+
+The error names a host that ends in `.railway.internal`
+
+The `DATABASE_URL` you copied from Railway still carries the private domain, which resolves only inside the project. Replace that host with the Tailscale machine name and keep the rest of the string, as in [Set the connection string](#set-the-connection-string).
+
+`drizzle-kit` cannot connect
+
+Run `tailscale status` on your device and check that it is signed in to the same tailnet the log named. Then open the Tailscale service’s deploy log and find the cause:
+
+- A line starts with `5432:` and ends in a network error, such as `connect: connection refused` or `no such host`. The variable is correct, and the database is unreachable on its private domain. Check that the database service is running and has private networking on. If the database listens on another port, add the port to the value, for example `5432:${{Postgres.RAILWAY_PRIVATE_DOMAIN}}:5433`.
+- No line starts with `5432:` or `TS_FORWARD_DATABASE`. The variable is empty, or its reference names a service outside your project. Set it on the Tailscale service’s `Variables` tab and click `Deploy` in the top bar.
+- A line starts with `TS_FORWARD_DATABASE`. The next entry explains that line.
+- The log shows `5432: ready`, and the machine name does not resolve. Check that MagicDNS is on, on the [DNS page](https://login.tailscale.com/admin/dns). If it is on, use the machine’s `Full domain` value from the Machines page as the host.
+
+The log prints a line that ends in `skipped`
+
+The line starts with the variable name, then gives the reason:
+
+- `does not match [port:]host[:port]`: the value has more than two colons.
+- `has an empty target host`: the value has a port but no host. A reference that names a service outside your project resolves to an empty host.
+- `still contains a Railway reference that did not resolve`: Railway did not replace the reference. Check the service name inside it.
+- `has a port outside 1-65535`: a port is not a number from 1 to 65535.
+- `reuses port`: an earlier forward already uses that port on the machine.
+- `uses port 443, which the https listener owns`: pick another port on the machine. The address of the database UI already uses 443 when HTTPS certificates are on.
+
+Fix the value on the Tailscale service’s `Variables` tab and click `Deploy` in the top bar.
+
+A new sign-in link appeared in the log
+
+The service restarted, for example after the key expired or the machine was removed. Open the newest link. The link works once.
+
+The log says the machine is waiting for approval
+
+Your tailnet has device approval turned on. Open the [Machines page](https://login.tailscale.com/admin/machines) and approve it.
+
+It worked for months and then stopped
+
+The machine’s key expired. Open the Tailscale service’s deploy log; it is printing a fresh sign-in link. Click it, then disable key expiry on the machine so it does not happen again.
+
+The machine name gained a `-1` suffix
+
+Your tailnet already had a machine with this name, for example from an earlier deploy. Tailscale keeps the suffix. If you want the short name, rename the machine on the Machines page. Otherwise, use the name that the Machines page shows.
 
 ## Next steps
 
-The forwarder can carry more than one port. [“Drizzle Studio and Gateway on Railway behind Tailscale”](../../tutorials/railway-studio-tailscale.md) tutorial deploys a database browser into the same Railway project and adds a second mapping for it, so you browse your tables from your tailnet without a public domain. That tutorial starts from an empty project, so with the forwarder already running you can go straight to the template deployment and the second mapping.
-
-## Troubleshooting
-
-The forwarder is not in the Machines list
-
-**The forwarder is not in the Machines list.** The auth key expired, or a key that was not reusable had already been used. Generate a new reusable key, update `TS_AUTHKEY` on the forwarder service, and redeploy.
-
-drizzle-kit cannot connect
-
-**`drizzle-kit` cannot connect.** Run `tailscale status` and check that your device is signed in to the same tailnet. Check that the port in your connection string matches the source port in `CONNECTION_MAPPING_01`. Railway’s PostgreSQL accepts TLS through the forwarder, so you do not need to disable SSL.
-
-The mapping variable is ignored
-
-**The mapping variable is ignored.** Confirm the exact variable name on the forwarder service. The template declares `CONNECTION_MAPPING_01`, with a leading zero. Some older guides write `CONNECTION_MAPPING_1`. Use the form the config panel shows you, and keep the numbers unique.
+- [Drizzle migrations fundamentals](../../migrations.md) to choose between `generate`, `migrate` and `push`.
+- [Drizzle Studio and Gateway on Railway with Tailscale](../../tutorials/railway-studio-tailscale.md) to browse the database from your tailnet.
