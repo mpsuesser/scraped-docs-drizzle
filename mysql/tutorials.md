@@ -2,8 +2,8 @@
 url: https://orm.drizzle.team/docs/mysql/tutorials
 title: "Tutorials"
 description: ""
-access_date: 2026-09-17T14:21:39.181Z
-current_date: 2026-09-17T14:21:39.181Z
+access_date: 2026-09-17T14:33:08.314Z
+current_date: 2026-09-17T14:33:08.314Z
 ---
 
 Tutorials
@@ -12,11 +12,11 @@ Tutorials
 
 [Drizzle Studio and Gateway on Railway with Tailscale](tutorials/railway-studio-tailscale.md)
 
-[Add Tailscale to Drizzle Studio or Gateway on Railway](https://orm.drizzle.team/docs/mysql/tutorials/railway-tailscale-existing-project)
+[Add Tailscale to Drizzle Studio or Gateway on Railway](tutorials/railway-tailscale-existing-project.md)
 
-[Connect Drizzle Kit to a private Railway database with Tailscale \[OUTDATED\]](https://orm.drizzle.team/docs/mysql/tutorials/railway-postgres-tailscale-legacy)
+[Connect Drizzle Kit to a private Railway database with Tailscale \[OUTDATED\]](tutorials/railway-postgres-tailscale-legacy.md)
 
-[Drizzle Studio and Gateway on Railway behind Tailscale \[OUTDATED\]](https://orm.drizzle.team/docs/mysql/tutorials/railway-studio-tailscale-legacy)
+[Drizzle Studio and Gateway on Railway behind Tailscale \[OUTDATED\]](tutorials/railway-studio-tailscale-legacy.md)
 
 [Drizzle with Node.js and PostgreSQL on Railway](tutorials/node-railway-pg.md)
 

@@ -2,15 +2,15 @@
 url: https://orm.drizzle.team/docs/singlestore/tutorials/railway-studio-tailscale
 title: "Railway Studio Tailscale"
 description: ""
-access_date: 2026-09-17T14:21:39.181Z
-current_date: 2026-09-17T14:21:39.181Z
+access_date: 2026-09-17T14:33:08.314Z
+current_date: 2026-09-17T14:33:08.314Z
 ---
 
 ## Drizzle Studio and Gateway on Railway with Tailscale
 
 Deploy Drizzle Studio or Drizzle Gateway on Railway so that it’s reachable only on your tailnet.
 
-If you already run Drizzle Studio or Drizzle Gateway on Railway, follow [Add Tailscale to Drizzle Studio or Gateway on Railway](https://orm.drizzle.team/docs/tutorials/railway-tailscale-existing-project) instead.
+If you already run Drizzle Studio or Drizzle Gateway on Railway, follow [Add Tailscale to Drizzle Studio or Gateway on Railway](../../tutorials/railway-tailscale-existing-project.md) instead.
 
 This guide assumes the following:
 
