@@ -2,8 +2,8 @@
 url: https://orm.drizzle.team/docs/connect-overview
 title: "Connect Overview"
 description: ""
-access_date: 2026-08-03T19:43:09.006Z
-current_date: 2026-08-03T19:43:09.006Z
+access_date: 2026-09-18T11:13:17.168Z
+current_date: 2026-09-18T11:13:17.168Z
 ---
 
 [v1.0](https://orm.drizzle.team/roadmap)
@@ -71,5 +71,6 @@ Use these PostgreSQL drivers and providers with Drizzle ORM.
 - [Bun SQL](connect-bun-sql.md)
 - [Effect Postgres](connect-effect-postgres.md)
 - [Netlify Database](connect-netlify-db.md)
+- [Appwrite Postgres](connect-appwrite-postgres.md)
 - [AWS Data API Postgres](connect-aws-data-api-pg.md)
 - [Drizzle HTTP proxy](connect-drizzle-proxy.md)

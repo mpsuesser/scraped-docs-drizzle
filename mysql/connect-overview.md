@@ -2,48 +2,67 @@
 url: https://orm.drizzle.team/docs/mysql/connect-overview
 title: "Connect Overview"
 description: ""
-access_date: 2026-08-03T19:43:09.006Z
-current_date: 2026-08-03T19:43:09.006Z
+access_date: 2026-09-18T11:13:17.168Z
+current_date: 2026-09-18T11:13:17.168Z
 ---
 
-MySQL
+[v1.0](https://orm.drizzle.team/roadmap)
 
-meet drizzle
+[
 
-[Get started](https://orm.drizzle.team/docs/mysql/get-started) [Sustainability](sustainability.md) [Why Drizzle?](overview.md) [Guides](guides.md) [Tutorials](tutorials.md) [Latest releases](latest-releases.md) [Gotchas](gotchas.md) [How to upgrade?](upgrade-v1.md) [v0 → v1 updates](v0-v1-changes.md) [Relational Queries v1 to v2](relations-v1-v2.md)
+98%
 
-Fundamentals
+](https://orm.drizzle.team/roadmap)
 
-[Schema](sql-schema-declaration.md) [Relations](relations-schema-declaration.md) [Database connection](connect-overview.md)
+[
 
-[MySQL connection docs](#mysql-connection-docs)
+Benchmarks
 
-[Query Data](data-querying.md) [Migrations](migrations.md)
+](https://orm.drizzle.team/benchmarks)[
 
-Manage schema
+Extension
 
-[Data types](column-types.md) [Indexes & Constraints](indexes-constraints.md) [Views](views.md) [Schemas](schemas.md) [Drizzle Relations](relations.md) [Extensions](extensions.md)
+](https://driz.link/extension)[
 
-Migrations
+Studio
 
-[Overview](kit-overview.md) [`generate`](drizzle-kit-generate.md) [`migrate`](drizzle-kit-migrate.md) [`push`](drizzle-kit-push.md) [`pull`](drizzle-kit-pull.md) [`export`](drizzle-kit-export.md) [`check`](drizzle-kit-check.md) [`up`](drizzle-kit-up.md) [`studio`](drizzle-kit-studio.md) [Custom migrations](kit-custom-migrations.md) [Migrations for teams](kit-migrations-for-teams.md) [Web and mobile](kit-web-mobile.md) [drizzle.config.ts](drizzle-config-file.md)
+](https://orm.drizzle.team/drizzle-studio/overview)[
 
-Seeding
+Studio Package
 
-[Overview](seed-overview.md) [Generators](seed-functions.md) [Versioning](seed-versioning.md) [Query](rqb.md) [Select](select.md) [Insert](insert.md) [Update](update.md) [Delete](delete.md) [Filters](operators.md) [Utils](query-utils.md) [Joins](joins.md) [Aliases](aliases.md) [Magic sql operator](sql.md) [SQL comments](sql-comments.md)
+](https://github.com/drizzle-team/drizzle-studio-npm)[
 
-Performance
+Gateway
 
-[Queries](perf-queries.md) [Serverless](perf-serverless.md)
+](https://gateway.drizzle.team/)[
 
-Advanced
+Drizzle Run
 
-[Set Operations](set-operations.md) [Generated Columns](generated-columns.md) [Transactions](transactions.md) [Cache](cache.md) [Dynamic query building](dynamic-query-building.md) [Read Replicas](read-replicas.md) [Custom types](custom-types.md) [JIT mappers](jit-mappers.md) [Goodies](goodies.md)
+](https://drizzle.run/)
 
-Validations
+Our goodies!
 
-[zod](zod.md) [valibot](valibot.md) [typebox](typebox.md) [arktype](arktype.md) [typebox-legacy](typebox-legacy.md) [effect-schema](effect-schema.md)
+Product by Drizzle Team
 
-Extensions
+[
 
-[ESLint Plugin](eslint-plugin.md) [drizzle-graphql](graphql.md)
+One Dollar Stats $1 per mo web analytics
+
+christmas  
+deal
+
+](https://driz.link/onedollarstats)
+
+## Database connection with Drizzle
+
+Use these MySQL drivers and providers with Drizzle ORM.
+
+## MySQL connection docs
+
+- [MySQL](get-started-mysql.md)
+- [PlanetScale MySQL](connect-planetscale.md)
+- [TiDB](connect-tidb.md)
+- [Appwrite MySQL](connect-appwrite-mysql.md)
+- [AWS Data API MySQL](connect-aws-data-api-mysql.md)
+- [Bun SQL](connect-bun-sql.md)
+- [Drizzle HTTP proxy](connect-drizzle-proxy.md)
