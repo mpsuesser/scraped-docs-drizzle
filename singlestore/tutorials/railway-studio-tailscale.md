@@ -2,15 +2,15 @@
 url: https://orm.drizzle.team/docs/singlestore/tutorials/railway-studio-tailscale
 title: "Railway Studio Tailscale"
 description: ""
-access_date: 2026-09-17T14:33:08.314Z
-current_date: 2026-09-17T14:33:08.314Z
+access_date: 2026-09-18T07:46:44.447Z
+current_date: 2026-09-18T07:46:44.447Z
 ---
 
-## Drizzle Studio and Gateway on Railway with Tailscale
+## Deploy Drizzle Studio or Gateway on Railway with private access over Tailscale
 
 Deploy Drizzle Studio or Drizzle Gateway on Railway so that it’s reachable only on your tailnet.
 
-If you already run Drizzle Studio or Drizzle Gateway on Railway, follow [Add Tailscale to Drizzle Studio or Gateway on Railway](../../tutorials/railway-tailscale-existing-project.md) instead.
+If you already run Drizzle Studio or Drizzle Gateway on Railway, follow [Add private access to Drizzle Studio, Gateway or a database on Railway with Tailscale](../../tutorials/railway-tailscale-existing-project.md) instead.
 
 This guide assumes the following:
 
@@ -198,7 +198,7 @@ Your tailnet has device approval turned on. Open the [Machines page](https://log
 
 Studio opens but shows no tables
 
-A new database has no tables until you apply a schema. Follow [Connect Drizzle Kit to a private Railway database with Tailscale](../../tutorials/railway-postgres-tailscale.md) to create them. If your database already has tables, check `DATABASE_URL` on the Drizzle Studio service’s `Variables` tab. It can point at a service outside this project, or hold a connection string that does not match your database. Set it to `${{Postgres.DATABASE_URL}}`, with your database service name in place of `Postgres`, and click `Deploy`.
+A new database has no tables until you apply a schema. Follow [Run Drizzle Kit against a private Railway database over Tailscale](../../tutorials/railway-postgres-tailscale.md) to create them. If your database already has tables, check `DATABASE_URL` on the Drizzle Studio service’s `Variables` tab. It can point at a service outside this project, or hold a connection string that does not match your database. Set it to `${{Postgres.DATABASE_URL}}`, with your database service name in place of `Postgres`, and click `Deploy`.
 
 The address does not open
 
@@ -236,5 +236,5 @@ Fix the value on the Tailscale service’s `Variables` tab and click `Deploy` in
 
 ## Next steps
 
-- [Connect Drizzle Kit to a private Railway database with Tailscale](../../tutorials/railway-postgres-tailscale.md) to run migrations over your tailnet.
+- [Run Drizzle Kit against a private Railway database over Tailscale](../../tutorials/railway-postgres-tailscale.md) to run migrations over your tailnet.
 - [Drizzle migrations fundamentals](../../migrations.md) to choose how to apply schema changes.

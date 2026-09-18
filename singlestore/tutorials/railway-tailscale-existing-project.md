@@ -2,15 +2,17 @@
 url: https://orm.drizzle.team/docs/singlestore/tutorials/railway-tailscale-existing-project
 title: "Railway Tailscale Existing Project"
 description: ""
-access_date: 2026-09-17T14:33:08.314Z
-current_date: 2026-09-17T14:33:08.314Z
+access_date: 2026-09-18T07:46:44.447Z
+current_date: 2026-09-18T07:46:44.447Z
 ---
 
-## Add Tailscale to Drizzle Studio or Gateway on Railway
+## Add private access to Drizzle Studio, Gateway or a database on Railway with Tailscale
 
-Add a Tailscale service to a Railway project that runs Drizzle Studio or Drizzle Gateway, so that the database UI is reachable on your tailnet.
+Railway’s private network is reachable only from services inside the project. To reach Drizzle Studio or Drizzle Gateway from your machine, the service needs a public domain, and a public domain is open to everyone on the internet.
 
-If you didn’t deploy Drizzle Studio or Gateway yet, follow [Drizzle Studio and Gateway on Railway with Tailscale](../../tutorials/railway-studio-tailscale.md).
+This guide adds a Tailscale service to a project that already runs Drizzle Studio or Drizzle Gateway. The database UI then has an address that only devices on your tailnet can open, and you can remove its public domain. The database itself can get the same private address, so that `drizzle-kit` or a [desktop database client](https://www.rubberboots.app/) on your machine connects to it while public networking stays off.
+
+If you didn’t deploy Drizzle Studio or Gateway yet, follow [Deploy Drizzle Studio or Gateway on Railway with private access over Tailscale](../../tutorials/railway-studio-tailscale.md).
 
 This guide assumes the following:
 
@@ -18,10 +20,6 @@ This guide assumes the following:
 - You have a [Tailscale](https://tailscale.com/) account.
 - You have the Tailscale client installed on the machine you work from, and that machine is signed in to your tailnet. You can find the downloads on the [Tailscale website](https://tailscale.com/download).
 - MagicDNS is on in your tailnet, because the address and the machine name depend on it. Tailnets created on or after 2022-10-20 have it on by default. If your tailnet is older, check the [DNS page](https://login.tailscale.com/admin/dns).
-
-## How it works
-
-This template adds a Tailscale service to your project. It joins your tailnet as its own machine and forwards a port on that machine to the database UI over Railway’s private network. Traffic goes from your device over the tailnet to that machine, and from there to the database UI.
 
 ## Add the Tailscale service
 

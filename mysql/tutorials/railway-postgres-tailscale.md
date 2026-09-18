@@ -2,17 +2,17 @@
 url: https://orm.drizzle.team/docs/mysql/tutorials/railway-postgres-tailscale
 title: "Railway Postgres Tailscale"
 description: ""
-access_date: 2026-09-17T14:21:39.181Z
-current_date: 2026-09-17T14:21:39.181Z
+access_date: 2026-09-18T07:46:44.447Z
+current_date: 2026-09-18T07:46:44.447Z
 ---
 
-## Connect Drizzle Kit to a private Railway database with Tailscale
+## Run Drizzle Kit against a private Railway database over Tailscale
 
 This tutorial connects `drizzle-kit` on your device to a PostgreSQL database on [Railway](https://driz.link/railway) that has public access turned off.
 
 You add a [Tailscale](https://tailscale.com/) service to the project that holds the database. Every device on your tailnet can then access the database.
 
-If you also want a database UI on your tailnet, start with [Drizzle Studio and Gateway on Railway with Tailscale](../../tutorials/railway-studio-tailscale.md). Its templates come with the same Tailscale service.
+If you also want a database UI on your tailnet, start with [Deploy Drizzle Studio or Gateway on Railway with private access over Tailscale](../../tutorials/railway-studio-tailscale.md). Its templates come with the same Tailscale service.
 
 This guide assumes the following:
 
@@ -269,4 +269,4 @@ Your tailnet already had a machine with this name, for example from an earlier d
 ## Next steps
 
 - [Drizzle migrations fundamentals](../../migrations.md) to choose between `generate`, `migrate` and `push`.
-- [Drizzle Studio and Gateway on Railway with Tailscale](../../tutorials/railway-studio-tailscale.md) to browse the database from your tailnet.
+- [Deploy Drizzle Studio or Gateway on Railway with private access over Tailscale](../../tutorials/railway-studio-tailscale.md) to browse the database from your tailnet.
