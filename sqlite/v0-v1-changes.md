@@ -2,8 +2,8 @@
 url: https://orm.drizzle.team/docs/sqlite/v0-v1-changes
 title: "V0 V1 Changes"
 description: ""
-access_date: 2026-10-31T10:54:20.546Z
-current_date: 2026-10-31T10:54:20.546Z
+access_date: 2026-10-31T11:01:52.587Z
+current_date: 2026-10-31T11:01:52.587Z
 ---
 
 ## Changes in v1
@@ -187,8 +187,8 @@ The UUID generator now produces RFC 4122 v4 compliant UUIDs, ensuring compatibil
 
 If you use a coding agent for the upgrade, Drizzle Kit provides two ways to help it work with your project:
 
-- The [Drizzle skill](https://orm.drizzle.team/docs/drizzle-kit-skills) gives your agent guidance on migration workflows, rename decisions and interpreting command results.
-- The [MCP server](https://orm.drizzle.team/docs/drizzle-kit-mcp) lets your agent call your project’s Drizzle Kit to check migration history, generate migrations and read an existing database’s schema.
+- The [Drizzle skill](../drizzle-kit-skills.md) gives your agent guidance on migration workflows, rename decisions and interpreting command results.
+- The [MCP server](../drizzle-kit-mcp.md) lets your agent call your project’s Drizzle Kit to check migration history, generate migrations and read an existing database’s schema.
 
 You can use them together, or use the skill with the CLI. After setup, try:
 

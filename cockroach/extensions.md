@@ -2,15 +2,15 @@
 url: https://orm.drizzle.team/docs/cockroach/extensions
 title: "Extensions"
 description: ""
-access_date: 2026-08-03T19:43:09.006Z
-current_date: 2026-08-03T19:43:09.006Z
+access_date: 2026-10-31T11:01:52.587Z
+current_date: 2026-10-31T11:01:52.587Z
 ---
 
 CockroachDB
 
 meet drizzle
 
-[Get started](https://orm.drizzle.team/docs/cockroach/get-started) [Sustainability](sustainability.md) [Why Drizzle?](overview.md) [Guides](guides.md) [Tutorials](tutorials.md) [Latest releases](latest-releases.md) [Gotchas](gotchas.md)
+[Get started](https://orm.drizzle.team/docs/cockroach/get-started) [Sustainability](sustainability.md) [Why Drizzle?](overview.md) [Guides](guides.md) [Tutorials](tutorials.md) [Latest releases](latest-releases.md) [Gotchas](gotchas.md) [MCP server](drizzle-kit-mcp.md) [Agent skills](drizzle-kit-skills.md)
 
 Fundamentals
 

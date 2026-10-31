@@ -2,11 +2,11 @@
 url: https://orm.drizzle.team/docs/singlestore/latest-releases
 title: "Latest Releases"
 description: ""
-access_date: 2026-10-31T10:54:20.546Z
-current_date: 2026-10-31T10:54:20.546Z
+access_date: 2026-10-31T11:01:52.587Z
+current_date: 2026-10-31T11:01:52.587Z
 ---
 
-Latest Releases[Drizzle ORM and Drizzle Kit v1.0.0-rc.5 release](https://orm.drizzle.team/docs/latest-releases/drizzle-orm-v1rc5)
+Latest Releases[Drizzle ORM and Drizzle Kit v1.0.0-rc.5 release](../latest-releases/drizzle-orm-v1rc5.md)
 
 [
 
@@ -16,7 +16,7 @@ Relational query improvements, incremental PostgreSQL snapshots, breaking change
 
 Read more
 
-](https://orm.drizzle.team/docs/latest-releases/drizzle-orm-v1rc5)[
+](../latest-releases/drizzle-orm-v1rc5.md)[
 
 Drizzle ORM and Drizzle Kit v1.0.0-rc.4 release
 
@@ -26,7 +26,7 @@ SQLite query improvements, more Turso and Effect drivers, and Drizzle Kit tools 
 
 Read more
 
-](https://orm.drizzle.team/docs/latest-releases/drizzle-orm-v1rc4)[
+](../latest-releases/drizzle-orm-v1rc4.md)[
 
 Drizzle ORM and Drizzle Kit v1.0.0-beta.2 release
 
