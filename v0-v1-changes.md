@@ -2,8 +2,8 @@
 url: https://orm.drizzle.team/docs/v0-v1-changes
 title: "V0 V1 Changes"
 description: ""
-access_date: 2026-08-03T19:43:09.006Z
-current_date: 2026-08-03T19:43:09.006Z
+access_date: 2026-10-31T10:54:20.546Z
+current_date: 2026-10-31T10:54:20.546Z
 ---
 
 ## Changes in v1
@@ -14,6 +14,26 @@ Read more on how to upgrade [here](upgrade-v1.md)
 
 ## Breaking changes
 
+#### Relational filters reject explicit undefined
+
+In Relational Queries v2, omit an optional filter field or use `EmptyFilter` from `drizzle-orm/relations`. Passing `undefined` explicitly throws. An empty relation filter such as `where: { posts: {} }` is skipped. Use `posts: true` to require related rows and `posts: false` to require their absence.
+
+See the [filter migration examples](relations-v1-v2.md#handle-optional-filters-explicitly), especially if you are upgrading from an earlier v1 release candidate.
+
+#### Read replicas require explicit routing
+
+With `withReplicas(primary, replicas)`, queries use the primary database by default. In 0.x, reads such as `select()` and `db.query` were routed to a replica automatically. Use `db.$replica` for reads you want to send to a replica:
+
+```ts
+// After: drizzle-orm@rc, with db created by withReplicas()
+await db.select().from(users); // primary
+await db.$replica.select().from(users); // replica
+```
+
+#### Query errors omit parameters by default
+
+`DrizzleQueryError` no longer includes query parameters by default. Set `paramsInErrors: true` in your `drizzle()` configuration if you need them for debugging. This also includes parameter values in the error message, so consider what your error logs retain.
+
 #### Relational Queries v1 removed
 
 RQBv1 has been removed. Use [Relational Queries v2](relations.md) with the new `defineRelations()` API instead and new features. You can find more details about migrating from rqb v1 to v2 [here](relations-v1-v2.md)
@@ -22,19 +42,27 @@ A new relations system built around `defineRelations()`:
 
 ```ts
 import { defineRelations } from 'drizzle-orm';
+import * as schema from './schema';
 
 const relations = defineRelations(schema, (r) => ({
   users: {
     posts: r.many.posts(),
-    profile: r.one.profiles(),
   },
   posts: {
-      from: posts.authorId,
-      to: users.id,
+      from: r.posts.authorId,
+      to: r.users.id,
     }),
   },
 }));
 ```
+
+#### Remove postgres-js JSON serialization workarounds
+
+If you manually added `JSON.stringify()` around JSON values in raw SQL or direct `postgres-js` calls to work around Drizzle’s driver overrides, remove that workaround. The driver serializes JSON parameters itself, so keeping it can double-stringify the value. In a `sql` template, wrap a JSON array in `sql.param(jsonArrayValue)` so it is treated as one parameter rather than a SQL value list.
+
+#### Relational queries use an optimized SQL shape
+
+Raw SQL that refers directly to generated relation aliases may need updating. Prefer relation filters and ordering, or set `strategy: 'basic'` on the affected query. See [the migration example](relations-v1-v2.md#check-raw-sql-references-to-relations).
 
 #### New Casing API
 
@@ -162,6 +190,31 @@ The `--strict` flag has been removed — its behavior is now the default. `drizz
 
 ## Other features
 
+#### Drizzle Kit for scripts and agents
+
+If you use a coding agent for the upgrade, Drizzle Kit provides two ways to help it work with your project:
+
+- The [Drizzle skill](https://orm.drizzle.team/docs/drizzle-kit-skills) gives your agent guidance on migration workflows, rename decisions and interpreting command results.
+- The [MCP server](https://orm.drizzle.team/docs/drizzle-kit-mcp) lets your agent call your project’s Drizzle Kit to check migration history, generate migrations and read an existing database’s schema.
+
+You can use them together, or use the skill with the CLI. After setup, try:
+
+```text
+Use the Drizzle skill to check this project's migration history.
+Use the Drizzle MCP server if connected. Explain any conflicts or warnings
+before changing files or applying anything to the database.
+```
+
+Use `--output json` with `generate`, `push`, `pull`, `up`, `export`, or `check` to receive a structured response. JSON mode is non-interactive. When a command needs a rename or data-loss decision, provide it through `--hints` or `--hints-file` and run the command again.
+
+The [programmatic SDK](https://github.com/drizzle-team/drizzle-orm/blob/beta/drizzle-kit/SDK.md) exposes these operations from `drizzle-kit`, with `exportSql()` for `export`.
+
+#### Relational query ordering and caching
+
+Relational Queries v2 can order by related rows, including aggregates such as `orderBy: { posts: 'desc(count)' }`. Both object and callback forms of `orderBy` are supported. See [ordering by relations](relations-v1-v2.md#order-by-related-rows).
+
+When a cache is configured with the `all` strategy, relational queries are cached by default. Set `withCache: false` on a query to opt out, or `withCache: true` to opt in with an explicit cache strategy.
+
 #### JIT Mappers (opt-in)
 
 Just-in-time compiled row mappers that make mapping as fast as the raw driver. You can find out more [here](jit-mappers.md)
@@ -247,13 +300,17 @@ How it works:
 
 If conflicts are found, the report tells you exactly which migrations on which branches are incompatible
 
-#### drizzle-kit --ignore-conflicts flag
+#### PostgreSQL snapshots and migration conflicts
 
-Bypasses commutativity checks when you know the conflicts are expected.
+The initial PostgreSQL snapshot contains the full schema. Subsequent snapshots store structured diffs. Keep migration folders and their snapshots together in version control.
 
-#### drizzle-kit generate: migration conflict detection
+Remove `--ignore-conflicts` from your PostgreSQL scripts. If `generate` reports conflicting migration branches, preview the proposed repair:
 
-`drizzle-kit generate` now identifies [incompatible changes](v0-v1-changes.md#drizzle-kit-check--commutativity-check) across migration branches. Use `--ignore-conflicts` to bypass.
+```shell
+drizzle-kit generate --fix-conflicts --explain
+```
+
+This shows the SQL and migration folders the repair would delete, without changing files. Review that output before running without `--explain`: the repair deletes the conflicting migrations and their children, then generates one replacement migration. Any database that ran a deleted migration must be reset.
 
 #### Updates to the migration table
 

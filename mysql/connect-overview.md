@@ -2,15 +2,15 @@
 url: https://orm.drizzle.team/docs/mysql/connect-overview
 title: "Connect Overview"
 description: ""
-access_date: 2026-09-18T11:13:17.168Z
-current_date: 2026-09-18T11:13:17.168Z
+access_date: 2026-10-31T10:54:20.546Z
+current_date: 2026-10-31T10:54:20.546Z
 ---
 
 [v1.0](https://orm.drizzle.team/roadmap)
 
 [
 
-98%
+99.5%
 
 ](https://orm.drizzle.team/roadmap)
 

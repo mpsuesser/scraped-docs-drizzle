@@ -2,15 +2,15 @@
 url: https://orm.drizzle.team/docs/get-started/expo-existing
 title: "Expo Existing"
 description: ""
-access_date: 2026-08-03T19:43:09.006Z
-current_date: 2026-08-03T19:43:09.006Z
+access_date: 2026-10-31T10:54:20.546Z
+current_date: 2026-10-31T10:54:20.546Z
 ---
 
 SQLite
 
 meet drizzle
 
-[Get started](https://orm.drizzle.team/docs/sqlite/get-started) [Sustainability](../sqlite/sustainability.md) [Why Drizzle?](../sqlite/overview.md) [Guides](../sqlite/guides.md) [Tutorials](../sqlite/tutorials.md) [Latest releases](../sqlite/latest-releases.md) [Gotchas](../sqlite/gotchas.md) [How to upgrade?](../sqlite/upgrade-v1.md) [v0 → v1 updates](../sqlite/v0-v1-changes.md) [Relational Queries v1 to v2](../sqlite/relations-v1-v2.md)
+[Get started](https://orm.drizzle.team/docs/sqlite/get-started) [Sustainability](../sqlite/sustainability.md) [Why Drizzle?](../sqlite/overview.md) [Guides](../sqlite/guides.md) [Tutorials](../sqlite/tutorials.md) [Latest releases](../sqlite/latest-releases.md) [Gotchas](../sqlite/gotchas.md) [How to upgrade?](../sqlite/upgrade-v1.md) [v0 → v1 updates](../sqlite/v0-v1-changes.md) [Relational Queries v1 to v2](../sqlite/relations-v1-v2.md) [MCP server](https://orm.drizzle.team/docs/sqlite/drizzle-kit-mcp) [Agent skills](https://orm.drizzle.team/docs/sqlite/drizzle-kit-skills)
 
 Fundamentals
 

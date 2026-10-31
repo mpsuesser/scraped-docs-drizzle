@@ -2,11 +2,30 @@
 url: https://orm.drizzle.team/docs/mysql/relations-v1-v2
 title: "Relations V1 V2"
 description: ""
-access_date: 2026-08-03T19:43:09.006Z
-current_date: 2026-08-03T19:43:09.006Z
+access_date: 2026-10-31T10:54:20.546Z
+current_date: 2026-10-31T10:54:20.546Z
 ---
 
 ## Migrating to Relational Queries version 2
+
+This guide migrates Relational Queries v1 from `drizzle-orm@0.x` or early v1 betas to Relational Queries v2 in `drizzle-orm@rc`. Notes about changes from earlier release candidates are marked below.
+
+Legacy relations imports
+
+The before examples below use the 0.x import: `import { relations } from 'drizzle-orm'`. In early v1 betas that kept both relational APIs, the legacy function was available as `import { relations } from 'drizzle-orm/_relations'`. Both are starting points for this migration. The `_relations` module still exists in rc.5, but RQB v1 support has been removed from the database drivers. For rc.5, use `import { defineRelations } from 'drizzle-orm'`.
+
+```ts
+// Before: drizzle-orm@0.x
+import { relations } from 'drizzle-orm';
+```
+```ts
+// Before: early v1 betas with the legacy RQB v1 API
+import { relations } from 'drizzle-orm/_relations';
+```
+```ts
+// After: drizzle-orm@rc (RQB v2)
+import { defineRelations } from 'drizzle-orm';
+```
 
 ```shell
 npm i drizzle-orm@rc
@@ -69,10 +88,10 @@ export const posts = p.mysqlTable('posts', {
 
 **One place for all your relations**
 
-❌ v1
+Before: drizzle-orm@0.x (RQB v1)
 
 ```ts
-import { relations } from "drizzle-orm/_relations";
+import { relations } from "drizzle-orm";
 import { users, posts } from './schema';
 
 export const usersRelation = relations(users, ({ one, many }) => ({
@@ -149,10 +168,10 @@ In v1, if you wanted only the `many` side of a relationship, you had to specify 
 
 In v2, you can simply use the `many` side without any additional steps
 
-❌ v1
+Before: drizzle-orm@0.x (RQB v1)
 
 ```ts
-import { relations } from "drizzle-orm/_relations";
+import { relations } from "drizzle-orm";
 import { users, posts } from './schema';
 
 export const usersRelation = relations(users, ({ one, many }) => ({
@@ -184,9 +203,9 @@ export const relations = defineRelations(schema, (r) => ({
 
 **New `optional` option**
 
-`optional: false` at the type level makes the `author` key in the `posts` object required. This should be used when you are certain that this specific entity will always exist.
+`optional: false` removes `null` from the related value’s inferred type. It does not create a database constraint. Use it only when you are certain that the related row will always exist.
 
-❌ v1
+Before: drizzle-orm@0.x (RQB v1)
 
 Was not supported in v1
 
@@ -211,7 +230,7 @@ export const relations = defineRelations(schema, (r) => ({
 
 We found a way to use the same strategy for all MySQL dialects, so there’s no need to specify them
 
-❌ v1
+Before: drizzle-orm@0.x (RQB v1)
 
 ```ts
 import * as schema from './schema'
@@ -233,7 +252,7 @@ const db = drizzle(process.env.DATABASE_URL, { relations });
 
 We’ve renamed `fields` to `from` and `references` to `to`, and we made both accept either a single value or an array
 
-❌ v1
+Before: drizzle-orm@0.x (RQB v1)
 
 ```ts
 ...
@@ -265,10 +284,10 @@ author: r.one.users({
 
 **`relationName` -> `alias`**
 
-❌ v1
+Before: drizzle-orm@0.x (RQB v1)
 
 ```ts
-import { relations } from "drizzle-orm/_relations";
+import { relations } from "drizzle-orm";
 import { users, posts } from './schema';
 
 export const postsRelation = relations(posts, ({ one }) => ({
@@ -295,108 +314,27 @@ export const relations = defineRelations(schema, (r) => ({
 }));
 ```
 
-**`custom types` new functions**
+**Custom types in relational queries**
 
-There are a few new function were added to custom types, so you can control how data is mapped on Relational Queries v2:
-
-fromJson
-
-Optional mapping function, that is used for transforming data returned by transformed to JSON in database data to desired format For example, when querying bigint column via [RQB](../rqb.md) or JSON functions, the result field will be returned as it’s string representation, as opposed to bigint from regular query To handle that, we need a separate function to handle such field’s mapping:
+When a custom column needs different handling inside JSON results, use `forJsonSelect` to change its SQL selection and `fromJson` to decode the result.
 
 ```ts
-fromJson(value: string): bigint {
-    return BigInt(value);
-},
+import { customType } from 'drizzle-orm/mysql-core';
+
+const customBigint = customType<{
+  data: bigint;
+  driverData: string;
+  jsonData: string;
+}>({
+  dataType: () => 'bigint',
+  toDriver: (value) => value.toString(),
+  fromDriver: (value) => BigInt(value),
+  fromJson: (value) => BigInt(value),
+  forJsonSelect: (identifier, sql) => sql\`cast(${identifier} as char)\`,
+});
 ```
 
-It’ll cause the returned data to change from:
-
-```ts
-{
-    customField: "5044565289845416380";
-}
-```
-
-to:
-
-```ts
-{
-    customField: 5044565289845416380n;
-}
-```
-
-forJsonSelect
-
-Optional selection modifier function, that is used for modifying selection of column inside JSON functions Additional mapping that could be required for such scenarios can be handled using fromJson function Used by [relational queries](../rqb.md)
-
-For example, when using bigint we need to cast field to text to preserve data integrity
-
-```ts
-forJsonSelect(identifier: SQL, sql: SQLGenerator, arrayDimensions?: number): SQL {
-    return sql\`${identifier}::text\`
-},
-```
-
-This will change query from:
-
-```sql
-SELECT
-    row_to_json("t".*)
-    FROM
-    (
-        SELECT
-        "table"."custom_bigint" AS "bigint"
-        FROM
-        "table"
-    ) AS "t"
-```
-
-to:
-
-```sql
-SELECT
-    row_to_json("t".*)
-    FROM
-    (
-        SELECT
-        "table"."custom_bigint"::text AS "bigint"
-        FROM
-        "table"
-    ) AS "t"
-```
-
-Returned by query object will change from:
-
-```ts
-{
-    bigint: 5044565289845416000; // Partial data loss due to direct conversion to JSON format
-}
-```
-
-to:
-
-```ts
-{
-    bigint: "5044565289845416380"; // Data is preserved due to conversion of field to text before JSON-ification
-}
-```
-
-✅ v2
-
-```ts
-const customBytes = customType<{
-     data: Buffer;
-     driverData: Buffer;
-     jsonData: string;
- }>({
-     dataType: () => 'bytea',
-     fromJson: (value) => {
-         return Buffer.from(value.slice(2, value.length), 'hex');
-     },
-     forJsonSelect: (identifier, sql, arrayDimensions) =>
-         sql\`${identifier}::text${sql.raw('[]'.repeat(arrayDimensions ?? 0))}\`,
- });
-```
+Casting the bigint to text preserves its digits before JSON conversion. `fromJson` converts that string back to a JavaScript `bigint`.
 
 ##### What is new?
 
@@ -438,7 +376,7 @@ export const usersToGroups = p.mysqlTable(
 );
 ```
 
-❌ v1
+Before: drizzle-orm@0.x (RQB v1)
 
 ```ts
 export const usersRelations = relations(users, ({ many }) => ({
@@ -503,7 +441,7 @@ const response = await db.query.users.findMany({
 
 **Predefined filters**
 
-❌ v1
+Before: drizzle-orm@0.x (RQB v1)
 
 Was not supported in v1
 
@@ -538,10 +476,10 @@ const response = await db.query.groups.findMany({
 
 ##### where is now object
 
-❌ v1
+Before: drizzle-orm@0.x (RQB v1)
 
 ```ts
-const response = db._query.users.findMany({
+const response = db.query.users.findMany({
   where: (users, { eq }) => eq(users.id, 1),
 });
 ```
@@ -592,12 +530,14 @@ const response = await db.query.users.findMany({
   }),
 ```
 
-##### orderBy is now object
+##### orderBy accepts objects and callbacks
 
-❌ v1
+The v1 callback form still works in v2. The object form is an alternative for column ordering.
+
+0.x and rc.5: supported callback syntax
 
 ```ts
-const response = db._query.users.findMany({
+const response = db.query.users.findMany({
   orderBy: (users, { asc }) => [asc(users.id)],
 });
 ```
@@ -612,7 +552,7 @@ const response = db.query.users.findMany({
 
 ##### Filtering by relations
 
-❌ v1
+Before: drizzle-orm@0.x (RQB v1)
 
 Was not supported in v1
 
@@ -637,7 +577,7 @@ const usersWithPosts = await db.query.usersTable.findMany({
 
 ##### Using offset on related objects
 
-❌ v1
+Before: drizzle-orm@0.x (RQB v1)
 
 Was not supported in v1
 
@@ -706,7 +646,7 @@ import * as schema2 from './schema2'
 
 Change drizzle database instance creation and provide `relations` object instead of `schema`
 
-Before
+Before: drizzle-orm@0.x (RQB v1)
 
 ```ts
 import * as schema from './schema'
@@ -769,14 +709,50 @@ WHERE
     \`d0\`.\`age\` = 15;
 ```
 
-##### Migrate orderBy statements
+##### Handle optional filters explicitly
 
-Order by was simplified to a single object, where you specify the column and the sort direction (`asc` or `desc`)
-
-❌ v1
+Starting with `1.0.0-rc.5`, an explicit `undefined` in a relational filter throws instead of silently skipping the condition. Omit the field, or use `EmptyFilter` when skipping it is intentional:
 
 ```ts
-const response = db._query.users.findMany({
+import { EmptyFilter } from 'drizzle-orm/relations';
+
+const userId: number | undefined = undefined;
+
+const response = await db.query.users.findMany({
+  where: {
+    id: userId ?? EmptyFilter,
+  },
+});
+```
+
+Here, an absent `userId` leaves the query unfiltered. Only skip the condition if returning all users is intended. This change concerns `db.query` filters, not conditional filters in the SQL query builder.
+
+##### Check whether a relation exists
+
+Use `true` to require a related row and `false` to require its absence:
+
+```ts
+// Users with at least one post
+const usersWithPosts = await db.query.users.findMany({
+  where: { posts: true },
+});
+
+// Users without posts
+const usersWithoutPosts = await db.query.users.findMany({
+  where: { posts: false },
+});
+```
+
+Starting with `1.0.0-rc.5`, `where: { posts: {} }` skips the relation filter. It does not check whether a post exists. The same applies when the object contains only empty conditions.
+
+##### Migrate orderBy statements
+
+You can use an object to specify each column and its sort direction (`asc` or `desc`). The callback form remains supported, so an existing `orderBy: (users, { asc }) => [asc(users.id)]` does not need to change.
+
+0.x and rc.5: supported callback syntax
+
+```ts
+const response = db.query.users.findMany({
   orderBy: (users, { asc }) => [asc(users.id)],
 });
 ```
@@ -789,11 +765,37 @@ const response = db.query.users.findMany({
 });
 ```
 
+##### Order by related rows
+
+You can order users by the number of related posts:
+
+```ts
+const usersByPostCount = await db.query.users.findMany({
+  orderBy: { posts: 'desc(count)' },
+});
+```
+
+For a field on a `many` relation, specify an aggregate, such as `orderBy: { posts: { id: 'desc(max)' } }`. For a `one` relation, use the field’s direction directly, such as `orderBy: { author: { name: 'asc' } }` when querying posts.
+
+##### Check raw SQL references to relations
+
+Starting with `1.0.0-rc.5`, the default `optimized` query strategy can nest relation subqueries differently. Raw SQL in `where` or `orderBy` that refers directly to generated relation aliases may no longer work.
+
+Prefer relation filters and relation ordering, which do not depend on those aliases. If an existing query needs its previous SQL shape, opt out for that root query:
+
+```ts
+const response = await db.query.users.findMany({
+  strategy: 'basic',
+  with: { posts: true },
+});
+```
+
 ##### Migrate many-to-many queries
 
 Relational Queries v1 had a very complex way of managing many-to-many queries. You had to use junction tables to query through them explicitly, and then map those tables out, like this:
 
 ```ts
+// Before: drizzle-orm@0.x (RQB v1)
 const response = await db.query.users.findMany({
   with: {
     usersToGroups: {
@@ -844,7 +846,7 @@ Examples
 
 **migrator**
 
-before
+Before: drizzle-orm@0.x (RQB v1)
 
 ```ts
 export async function migrate<
@@ -870,7 +872,7 @@ export async function migrate<TRelations extends AnyRelations>(
 
 **session**
 
-before
+Before: drizzle-orm@0.x (RQB v1)
 
 ```ts
 export class MySql2Session<
@@ -889,7 +891,7 @@ export class MySql2Session<
 
 **transaction**
 
-before
+Before: drizzle-orm@0.x (RQB v1)
 
 ```ts
 export class MySql2Transaction<
@@ -908,7 +910,7 @@ export class MySql2Transaction<
 
 **driver**
 
-before
+Before: drizzle-orm@0.x (RQB v1)
 
 ```ts
 export class MySql2Database<
@@ -928,7 +930,7 @@ export class MySql2Database<
 
 Examples
 
-before
+Before: drizzle-orm@0.x (RQB v1)
 
 ```ts
 export interface DrizzleConfig<

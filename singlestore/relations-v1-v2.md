@@ -2,11 +2,30 @@
 url: https://orm.drizzle.team/docs/singlestore/relations-v1-v2
 title: "Relations V1 V2"
 description: ""
-access_date: 2026-08-03T19:43:09.006Z
-current_date: 2026-08-03T19:43:09.006Z
+access_date: 2026-10-31T10:54:20.546Z
+current_date: 2026-10-31T10:54:20.546Z
 ---
 
 ## Migrating to Relational Queries version 2
+
+This guide migrates Relational Queries v1 from `drizzle-orm@0.x` or early v1 betas to Relational Queries v2 in `drizzle-orm@rc`. Notes about changes from earlier release candidates are marked below.
+
+Legacy relations imports
+
+The before examples below use the 0.x import: `import { relations } from 'drizzle-orm'`. In early v1 betas that kept both relational APIs, the legacy function was available as `import { relations } from 'drizzle-orm/_relations'`. Both are starting points for this migration. The `_relations` module still exists in rc.5, but RQB v1 support has been removed from the database drivers. For rc.5, use `import { defineRelations } from 'drizzle-orm'`.
+
+```ts
+// Before: drizzle-orm@0.x
+import { relations } from 'drizzle-orm';
+```
+```ts
+// Before: early v1 betas with the legacy RQB v1 API
+import { relations } from 'drizzle-orm/_relations';
+```
+```ts
+// After: drizzle-orm@rc (RQB v2)
+import { defineRelations } from 'drizzle-orm';
+```
 
 ```shell
 npm i drizzle-orm@rc
@@ -69,10 +88,10 @@ export const posts = p.pgTable('posts', {
 
 **One place for all your relations**
 
-❌ v1
+Before: drizzle-orm@0.x (RQB v1)
 
 ```ts
-import { relations } from "drizzle-orm/_relations";
+import { relations } from "drizzle-orm";
 import { users, posts } from './schema';
 
 export const usersRelation = relations(users, ({ one, many }) => ({
@@ -149,10 +168,10 @@ In v1, if you wanted only the `many` side of a relationship, you had to specify 
 
 In v2, you can simply use the `many` side without any additional steps
 
-❌ v1
+Before: drizzle-orm@0.x (RQB v1)
 
 ```ts
-import { relations } from "drizzle-orm/_relations";
+import { relations } from "drizzle-orm";
 import { users, posts } from './schema';
 
 export const usersRelation = relations(users, ({ one, many }) => ({
@@ -184,9 +203,9 @@ export const relations = defineRelations(schema, (r) => ({
 
 **New `optional` option**
 
-`optional: false` at the type level makes the `author` key in the `posts` object required. This should be used when you are certain that this specific entity will always exist.
+`optional: false` removes `null` from the related value’s inferred type. It does not create a database constraint. Use it only when you are certain that the related row will always exist.
 
-❌ v1
+Before: drizzle-orm@0.x (RQB v1)
 
 Was not supported in v1
 
@@ -210,7 +229,7 @@ export const relations = defineRelations(schema, (r) => ({
 
 We found a way to use the same strategy for all MySQL dialects, so there’s no need to specify them
 
-❌ v1
+Before: drizzle-orm@0.x (RQB v1)
 
 ```ts
 import * as schema from './schema'
@@ -232,7 +251,7 @@ const db = drizzle(process.env.DATABASE_URL, { relations });
 
 We’ve renamed `fields` to `from` and `references` to `to`, and we made both accept either a single value or an array
 
-❌ v1
+Before: drizzle-orm@0.x (RQB v1)
 
 ```ts
 ...
@@ -264,10 +283,10 @@ author: r.one.users({
 
 **`relationName` -> `alias`**
 
-❌ v1
+Before: drizzle-orm@0.x (RQB v1)
 
 ```ts
-import { relations } from "drizzle-orm/_relations";
+import { relations } from "drizzle-orm";
 import { users, posts } from './schema';
 
 export const postsRelation = relations(posts, ({ one }) => ({
@@ -353,7 +372,7 @@ export const usersToGroups = p.pgTable(
 );
 ```
 
-❌ v1
+Before: drizzle-orm@0.x (RQB v1)
 
 ```ts
 export const usersRelations = relations(users, ({ many }) => ({
@@ -418,7 +437,7 @@ const response = await db.query.users.findMany({
 
 **Predefined filters**
 
-❌ v1
+Before: drizzle-orm@0.x (RQB v1)
 
 Was not supported in v1
 
@@ -453,10 +472,10 @@ const response = await db.query.groups.findMany({
 
 ##### where is now object
 
-❌ v1
+Before: drizzle-orm@0.x (RQB v1)
 
 ```ts
-const response = db._query.users.findMany({
+const response = db.query.users.findMany({
   where: (users, { eq }) => eq(users.id, 1),
 });
 ```
@@ -514,12 +533,14 @@ const response = await db.query.users.findMany({
 });
 ```
 
-##### orderBy is now object
+##### orderBy accepts objects and callbacks
 
-❌ v1
+The v1 callback form still works in v2. The object form is an alternative for column ordering.
+
+0.x and rc.5: supported callback syntax
 
 ```ts
-const response = db._query.users.findMany({
+const response = db.query.users.findMany({
   orderBy: (users, { asc }) => [asc(users.id)],
 });
 ```
@@ -534,7 +555,7 @@ const response = db.query.users.findMany({
 
 ##### Filtering by relations
 
-❌ v1
+Before: drizzle-orm@0.x (RQB v1)
 
 Was not supported in v1
 
@@ -559,7 +580,7 @@ const usersWithPosts = await db.query.usersTable.findMany({
 
 ##### Using offset on related objects
 
-❌ v1
+Before: drizzle-orm@0.x (RQB v1)
 
 Was not supported in v1
 
@@ -628,7 +649,7 @@ import * as schema2 from './schema2'
 
 Change drizzle database instance creation and provide `relations` object instead of `schema`
 
-Before
+Before: drizzle-orm@0.x (RQB v1)
 
 ```ts
 import * as schema from './schema'
@@ -691,14 +712,50 @@ where
   "d0"."age" = 15
 ```
 
-##### Migrate orderBy statements
+##### Handle optional filters explicitly
 
-Order by was simplified to a single object, where you specify the column and the sort direction (`asc` or `desc`)
-
-❌ v1
+Starting with `1.0.0-rc.5`, an explicit `undefined` in a relational filter throws instead of silently skipping the condition. Omit the field, or use `EmptyFilter` when skipping it is intentional:
 
 ```ts
-const response = db._query.users.findMany({
+import { EmptyFilter } from 'drizzle-orm/relations';
+
+const userId: number | undefined = undefined;
+
+const response = await db.query.users.findMany({
+  where: {
+    id: userId ?? EmptyFilter,
+  },
+});
+```
+
+Here, an absent `userId` leaves the query unfiltered. Only skip the condition if returning all users is intended. This change concerns `db.query` filters, not conditional filters in the SQL query builder.
+
+##### Check whether a relation exists
+
+Use `true` to require a related row and `false` to require its absence:
+
+```ts
+// Users with at least one post
+const usersWithPosts = await db.query.users.findMany({
+  where: { posts: true },
+});
+
+// Users without posts
+const usersWithoutPosts = await db.query.users.findMany({
+  where: { posts: false },
+});
+```
+
+Starting with `1.0.0-rc.5`, `where: { posts: {} }` skips the relation filter. It does not check whether a post exists. The same applies when the object contains only empty conditions.
+
+##### Migrate orderBy statements
+
+You can use an object to specify each column and its sort direction (`asc` or `desc`). The callback form remains supported, so an existing `orderBy: (users, { asc }) => [asc(users.id)]` does not need to change.
+
+0.x and rc.5: supported callback syntax
+
+```ts
+const response = db.query.users.findMany({
   orderBy: (users, { asc }) => [asc(users.id)],
 });
 ```
@@ -711,11 +768,24 @@ const response = db.query.users.findMany({
 });
 ```
 
+##### Order by related rows
+
+You can order users by the number of related posts:
+
+```ts
+const usersByPostCount = await db.query.users.findMany({
+  orderBy: { posts: 'desc(count)' },
+});
+```
+
+For a field on a `many` relation, specify an aggregate, such as `orderBy: { posts: { id: 'desc(max)' } }`. For a `one` relation, use the field’s direction directly, such as `orderBy: { author: { name: 'asc' } }` when querying posts.
+
 ##### Migrate many-to-many queries
 
 Relational Queries v1 had a very complex way of managing many-to-many queries. You had to use junction tables to query through them explicitly, and then map those tables out, like this:
 
 ```ts
+// Before: drizzle-orm@0.x (RQB v1)
 const response = await db.query.users.findMany({
   with: {
     usersToGroups: {
@@ -766,7 +836,7 @@ Examples
 
 **migrator**
 
-before
+Before: drizzle-orm@0.x (RQB v1)
 
 ```ts
 export async function migrate<
@@ -792,7 +862,7 @@ export async function migrate<TRelations extends AnyRelations>(
 
 **session**
 
-before
+Before: drizzle-orm@0.x (RQB v1)
 
 ```ts
 export class NodePgSession<
@@ -811,7 +881,7 @@ export class NodePgSession<
 
 **transaction**
 
-before
+Before: drizzle-orm@0.x (RQB v1)
 
 ```ts
 export class NodePgTransaction<
@@ -830,7 +900,7 @@ export class NodePgTransaction<
 
 **driver**
 
-before
+Before: drizzle-orm@0.x (RQB v1)
 
 ```ts
 export class NodePgDatabase<
@@ -850,7 +920,7 @@ export class NodePgDatabase<
 
 Examples
 
-before
+Before: drizzle-orm@0.x (RQB v1)
 
 ```ts
 export interface DrizzleConfig<

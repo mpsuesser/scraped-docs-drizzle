@@ -2,15 +2,15 @@
 url: https://orm.drizzle.team/docs/sqlite/connect-react-native-sqlite
 title: "Connect React Native Sqlite"
 description: ""
-access_date: 2026-08-03T19:43:09.006Z
-current_date: 2026-08-03T19:43:09.006Z
+access_date: 2026-10-31T10:54:20.546Z
+current_date: 2026-10-31T10:54:20.546Z
 ---
 
 [v1.0](https://orm.drizzle.team/roadmap)
 
 [
 
-98%
+99.5%
 
 ](https://orm.drizzle.team/roadmap)
 

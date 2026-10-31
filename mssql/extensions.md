@@ -2,15 +2,15 @@
 url: https://orm.drizzle.team/docs/mssql/extensions
 title: "Extensions"
 description: ""
-access_date: 2026-08-03T19:43:09.006Z
-current_date: 2026-08-03T19:43:09.006Z
+access_date: 2026-10-31T10:54:20.546Z
+current_date: 2026-10-31T10:54:20.546Z
 ---
 
 MSSQL
 
 meet drizzle
 
-[Get started](https://orm.drizzle.team/docs/mssql/get-started) [Sustainability](sustainability.md) [Why Drizzle?](overview.md) [Guides](guides.md) [Tutorials](tutorials.md) [Latest releases](latest-releases.md) [Gotchas](gotchas.md)
+[Get started](https://orm.drizzle.team/docs/mssql/get-started) [Sustainability](sustainability.md) [Why Drizzle?](overview.md) [Guides](guides.md) [Tutorials](tutorials.md) [Latest releases](latest-releases.md) [Gotchas](gotchas.md) [MCP server](https://orm.drizzle.team/docs/mssql/drizzle-kit-mcp) [Agent skills](https://orm.drizzle.team/docs/mssql/drizzle-kit-skills)
 
 Fundamentals
 
