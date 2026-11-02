@@ -2,8 +2,8 @@
 url: https://orm.drizzle.team/docs/latest-releases/drizzle-orm-v1beta2
 title: "Drizzle Orm V1beta2"
 description: ""
-access_date: 2026-08-03T19:43:09.006Z
-current_date: 2026-08-03T19:43:09.006Z
+access_date: 2026-11-02T08:43:26.142Z
+current_date: 2026-11-02T08:43:26.142Z
 ---
 
 ## Drizzle ORM and Drizzle Kit v1.0.0-beta.2 release
@@ -51,7 +51,7 @@ const result = await db.execute('select 1');
 
 ## CockroachDB dialect
 
-Drizzle now supports MSSQL in `drizzle-orm`, `drizzle-kit` and `drizzle-seed` packages. It support most of the columns, query builder capabilities, migration strategies, etc.
+Drizzle now supports CockroachDB in `drizzle-orm`, `drizzle-kit` and `drizzle-seed` packages. It support most of the columns, query builder capabilities, migration strategies, etc.
 
 The only feature that is not yet supported is `RQBv2`
 
