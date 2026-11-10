@@ -2,8 +2,8 @@
 url: https://orm.drizzle.team/docs/realtime-queries
 title: "Realtime Queries"
 description: ""
-access_date: 2026-11-10T15:42:53.848Z
-current_date: 2026-11-10T15:42:53.848Z
+access_date: 2026-11-10T16:17:09.354Z
+current_date: 2026-11-10T16:17:09.354Z
 ---
 
 ## Queries
@@ -59,9 +59,16 @@ The where clause uses the same object syntax as the `where` filters of [Drizzle 
 ```ts
 export const bigOpenOrders = ordersPulse.query((ctx) =>
   ctx.query({
-    price: { gte: 100 },
+    price: { gte: 100, lt: 1000 },
     status: { in: ['requested', 'accepted'] },
     driverId: { isNotNull: true },
+  })
+);
+
+export const cheapOrders = ordersPulse.query((ctx) =>
+  ctx.query({
+    price: { gt: 0, lte: 20 },
+    status: { ne: 'cancelled' },
   })
 );
 ```
@@ -73,13 +80,17 @@ export const urgentOrders = ordersPulse.query((ctx) =>
   ctx.query({
     OR: [
       { status: 'requested' },
-      { AND: [{ status: 'accepted' }, { NOT: { driverId: { isNotNull: true } } }] },
+      { AND: [{ status: { eq: 'accepted' } }, { driverId: { isNull: true } }] },
     ],
   })
 );
-```
 
-If the function returns `null`, the query matches every row.
+export const activeOrders = ordersPulse.query((ctx) =>
+  ctx.query({
+    NOT: { status: { in: ['completed', 'cancelled'] } },
+  })
+);
+```
 
 ## Arguments
 
@@ -100,6 +111,14 @@ IMPORTANT
 The schema must validate synchronously. A schema with asynchronous checks, such as a zod schema with an async refinement, throws an error when you use the query.
 
 Call `.args()` before `.query()`. Calling `.args()` after `.query()` throws an error, and so does calling `.query()` twice in one chain. Without `.args()`, `ctx.args` is empty.
+
+If the function returns `null`, the query matches every row. Use it for an optional argument:
+
+```ts
+export const ordersWithOptionalStatus = ordersPulse
+  .args(z.object({ status: z.enum(['requested', 'accepted', 'completed', 'cancelled']).optional() }))
+  .query((ctx) => (ctx.args.status ? ctx.query({ status: ctx.args.status }) : null));
+```
 
 ### Values from a request
 

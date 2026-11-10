@@ -2,8 +2,8 @@
 url: https://orm.drizzle.team/docs/realtime-server-setup
 title: "Realtime Server Setup"
 description: ""
-access_date: 2026-11-10T15:42:53.848Z
-current_date: 2026-11-10T15:42:53.848Z
+access_date: 2026-11-10T16:17:09.354Z
+current_date: 2026-11-10T16:17:09.354Z
 ---
 
 ## Server setup
@@ -63,6 +63,20 @@ await runtime.start();
 | `wal` | Optional. `{ publicationName?, slotName? }`. Both default to `drizzle_pulse`. |
 | `logLevel` | Optional. `LogLevel.Silent`, `LogLevel.Error`, `LogLevel.Info`, or `LogLevel.Debug`. The default is `LogLevel.Info`. Import `LogLevel` from `drizzle-pulse/embedded`. |
 | `telemetry` | Optional. A function that receives a [telemetry event](#telemetry) for each applied batch of changes. |
+
+The optional settings look like this:
+
+```ts
+import { createRuntime, LogLevel } from 'drizzle-pulse/embedded';
+
+const runtime = createRuntime({
+  queries: { allOrders: ordersPulse, ordersByStatus },
+  databaseUrl: process.env.DATABASE_URL!,
+  sourceDb: drizzle(process.env.DATABASE_URL!),
+  wal: { publicationName: 'orders_pulse', slotName: 'orders_pulse' },
+  logLevel: LogLevel.Error,
+});
+```
 
 `runtime.start()` prepares the [database objects](#database-objects) and then starts the replication stream. Create live collections and subscribe to CDC event streams only after `start()` finishes.
 
@@ -151,6 +165,10 @@ await provision({
 ```
 
 If you already have a runtime object, `runtime.provision()` does the same. It throws an error if the runtime is already started.
+
+```ts
+await runtime.provision();
+```
 
 After provisioning, `start()` finds every source table in the publication with `REPLICA IDENTITY FULL`, so it runs no setup statements. The application role then needs:
 

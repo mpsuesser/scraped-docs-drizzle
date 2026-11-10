@@ -2,8 +2,8 @@
 url: https://orm.drizzle.team/docs/realtime-live-collections
 title: "Realtime Live Collections"
 description: ""
-access_date: 2026-11-10T15:42:53.848Z
-current_date: 2026-11-10T15:42:53.848Z
+access_date: 2026-11-10T16:17:09.354Z
+current_date: 2026-11-10T16:17:09.354Z
 ---
 
 ## Live collections and CDC event streams
@@ -41,7 +41,12 @@ Each call creates a new, independent live collection. Create a live collection o
 `list()` returns the current rows synchronously. The rows are sorted by primary key, in the direction that the query’s `.order()` sets. Call it whenever you need the rows, for example in a request handler.
 
 ```ts
-const rows = orders.list();
+import type { PulseRow } from 'drizzle-pulse/embedded';
+
+// The row type of a live collection: the selected columns of the query.
+type AcceptedOrder = PulseRow<typeof orders>;
+
+const rows: readonly AcceptedOrder[] = orders.list();
 ```
 
 ### Change notifications
@@ -52,9 +57,25 @@ const rows = orders.list();
 2. `state`: the rows after the change. It is the same as `list()`.
 3. `lsn`: the log sequence number of the commit.
 ```ts
-orders.onChange(({ events, state, lsn }) => {
-  console.log(\`${events.length} changes, ${state.length} rows at ${lsn}\`);
+const removeListener = orders.onChange(({ events, state, lsn }) => {
+  for (const event of events) {
+    switch (event.op) {
+      case 'insert':
+        console.log('added', event.pk, event.row);
+        break;
+      case 'update':
+        console.log('changed', event.pk, event.oldRow, '->', event.row);
+        break;
+      case 'delete':
+        console.log('removed', event.pk, event.oldRow);
+        break;
+    }
+  }
+  console.log(\`${state.length} rows at ${lsn}\`);
 });
+
+// Later, when you no longer need the notifications.
+removeListener();
 ```
 
 `onChange()` returns a function that removes the listener.

@@ -2,8 +2,8 @@
 url: https://orm.drizzle.team/docs/realtime-overview
 title: "Realtime Overview"
 description: ""
-access_date: 2026-11-10T15:42:53.848Z
-current_date: 2026-11-10T15:42:53.848Z
+access_date: 2026-11-10T16:17:09.354Z
+current_date: 2026-11-10T16:17:09.354Z
 ---
 
 ## Drizzle Pulse
@@ -68,7 +68,11 @@ You can also run code when the rows change. Register a listener on the live coll
 
 ```ts
 // Called after each change to the accepted orders.
-collection.onChange(({ state }) => {
+collection.onChange(({ events, state }) => {
+  for (const event of events) {
+    // event.op is 'insert', 'update' or 'delete'.
+    console.log(event.op, event.pk);
+  }
   console.log('Accepted orders now:', state);
 });
 
