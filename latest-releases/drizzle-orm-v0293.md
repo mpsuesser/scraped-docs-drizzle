@@ -2,15 +2,15 @@
 url: https://orm.drizzle.team/docs/latest-releases/drizzle-orm-v0293
 title: "Drizzle Orm V0293"
 description: ""
-access_date: 2026-11-12T09:01:42.866Z
-current_date: 2026-11-12T09:01:42.866Z
+access_date: 2026-11-12T09:15:29.353Z
+current_date: 2026-11-12T09:15:29.353Z
 ---
 
 PostgreSQL
 
 meet drizzle
 
-[Get started](../get-started.md) [Sustainability](../sustainability.md) [Why Drizzle?](../overview.md) [Guides](../guides.md) [Tutorials](../tutorials.md) [Latest releases](../latest-releases.md) [Gotchas](../gotchas.md) [How to upgrade?](../upgrade-v1.md) [v0 → v1 updates](../v0-v1-changes.md) [Relational Queries v1 to v2](../relations-v1-v2.md) [Set up your agent](https://orm.drizzle.team/docs/agents) [MCP server](../drizzle-kit-mcp.md) [Agent skills](../drizzle-kit-skills.md)
+[Get started](../get-started.md) [Sustainability](../sustainability.md) [Why Drizzle?](../overview.md) [Guides](../guides.md) [Tutorials](../tutorials.md) [Latest releases](../latest-releases.md) [Gotchas](../gotchas.md) [How to upgrade?](../upgrade-v1.md) [v0 → v1 updates](../v0-v1-changes.md) [Relational Queries v1 to v2](../relations-v1-v2.md) [Set up your agent](../agents.md) [MCP server](../drizzle-kit-mcp.md) [Agent skills](../drizzle-kit-skills.md)
 
 Fundamentals
 

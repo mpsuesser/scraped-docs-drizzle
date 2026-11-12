@@ -2,15 +2,15 @@
 url: https://orm.drizzle.team/docs/mssql/connect-overview
 title: "Connect Overview"
 description: ""
-access_date: 2026-11-12T09:01:42.866Z
-current_date: 2026-11-12T09:01:42.866Z
+access_date: 2026-11-12T09:15:29.353Z
+current_date: 2026-11-12T09:15:29.353Z
 ---
 
 MSSQL
 
 meet drizzle
 
-[Get started](https://orm.drizzle.team/docs/mssql/get-started) [Sustainability](sustainability.md) [Why Drizzle?](overview.md) [Guides](guides.md) [Tutorials](tutorials.md) [Latest releases](latest-releases.md) [Gotchas](gotchas.md) [Set up your agent](https://orm.drizzle.team/docs/mssql/agents) [MCP server](drizzle-kit-mcp.md) [Agent skills](drizzle-kit-skills.md)
+[Get started](https://orm.drizzle.team/docs/mssql/get-started) [Sustainability](sustainability.md) [Why Drizzle?](overview.md) [Guides](guides.md) [Tutorials](tutorials.md) [Latest releases](latest-releases.md) [Gotchas](gotchas.md) [Set up your agent](agents.md) [MCP server](drizzle-kit-mcp.md) [Agent skills](drizzle-kit-skills.md)
 
 Fundamentals
 
