@@ -2,8 +2,8 @@
 url: https://orm.drizzle.team/docs/sqlite/drizzle-kit-skills
 title: "Drizzle Kit Skills"
 description: ""
-access_date: 2026-10-31T11:01:52.587Z
-current_date: 2026-10-31T11:01:52.587Z
+access_date: 2026-11-12T09:01:42.866Z
+current_date: 2026-11-12T09:01:42.866Z
 ---
 
 ## Drizzle agent skills
@@ -16,38 +16,30 @@ Use the `drizzle` skill when working on Drizzle schema, queries or config with y
 
 You can use the skill with the [MCP server](../drizzle-kit-mcp.md), the CLI or the SDK.
 
-## Install the skill from your project’s Drizzle Kit
+## Quick start
 
-These examples use rc5. Install the packages where your Drizzle schema and config live. In a monorepo, use that workspace package:
-
-```shell
-npm i drizzle-orm@rc
-npm i -D drizzle-kit@rc
-```
-
-Then run the skills command from that directory:
-
-```shell
-npx --no-install drizzle-kit skills
-```
-
-Choose your agent and installation scope when prompted. Installation needs network access to run `skills@latest`, but the Drizzle instructions come from your project’s installed Drizzle Kit.
-
-Upgrading skills from rc4
-
-rc5 replaces rc4’s separate skills with one `drizzle` skill and automatically removes the old project skills. Back up any custom edits before upgrading. User-level skills are unchanged.
-
-## Ask your agent to use the Drizzle skill
-
-Use your agent’s skill picker or ask it to load the `drizzle` skill. For example:
-
-```text
-Use the drizzle skill. In src/db/schema.ts, rename users.full_name
-to users.display_name and generate a migration. Show me the SQL
-before applying anything to the database.
-```
-
-The skill guides your agent through the rename decision so the migration preserves the existing column’s data. Generating the migration does not apply it. Your agent’s permissions and approval settings still govern command execution.
+1. ### Install Drizzle in your project
+	These examples use rc5. Install the packages where your Drizzle schema and config live. In a monorepo, use that workspace package:
+	```shell
+	npm i drizzle-orm@rc
+	npm i -D drizzle-kit@rc
+	```
+2. ### Install the skill from your project’s Drizzle Kit
+	Upgrading skills from rc4
+	rc5 replaces rc4’s separate skills with one `drizzle` skill and automatically removes the old project skills. Back up any custom edits before upgrading. User-level skills are unchanged.
+	Run the skills command from your Drizzle package directory:
+	```shell
+	npx --no-install drizzle-kit skills
+	```
+	Choose your agent and installation scope when prompted. Installation needs network access to run `skills@latest`, but the Drizzle instructions come from your project’s installed Drizzle Kit.
+3. ### Ask your agent to use the Drizzle skill
+	Use your agent’s skill picker or ask it to load the `drizzle` skill. For example:
+	```text
+	Use the drizzle skill. In src/db/schema.ts, rename users.full_name
+	to users.display_name and generate a migration. Show me the SQL
+	before applying anything to the database.
+	```
+	The skill guides your agent through the rename decision so the migration preserves the existing column’s data. Generating the migration does not apply it. Your agent’s permissions and approval settings still govern command execution.
 
 ## Keep the installed instructions current
 

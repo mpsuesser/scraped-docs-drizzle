@@ -2,15 +2,15 @@
 url: https://orm.drizzle.team/docs/mysql/extensions
 title: "Extensions"
 description: ""
-access_date: 2026-10-31T11:01:52.587Z
-current_date: 2026-10-31T11:01:52.587Z
+access_date: 2026-11-12T09:01:42.866Z
+current_date: 2026-11-12T09:01:42.866Z
 ---
 
 MySQL
 
 meet drizzle
 
-[Get started](https://orm.drizzle.team/docs/mysql/get-started) [Sustainability](sustainability.md) [Why Drizzle?](overview.md) [Guides](guides.md) [Tutorials](tutorials.md) [Latest releases](latest-releases.md) [Gotchas](gotchas.md) [How to upgrade?](upgrade-v1.md) [v0 → v1 updates](v0-v1-changes.md) [Relational Queries v1 to v2](relations-v1-v2.md) [MCP server](drizzle-kit-mcp.md) [Agent skills](drizzle-kit-skills.md)
+[Get started](https://orm.drizzle.team/docs/mysql/get-started) [Sustainability](sustainability.md) [Why Drizzle?](overview.md) [Guides](guides.md) [Tutorials](tutorials.md) [Latest releases](latest-releases.md) [Gotchas](gotchas.md) [How to upgrade?](upgrade-v1.md) [v0 → v1 updates](v0-v1-changes.md) [Relational Queries v1 to v2](relations-v1-v2.md) [Set up your agent](https://orm.drizzle.team/docs/mysql/agents) [MCP server](drizzle-kit-mcp.md) [Agent skills](drizzle-kit-skills.md)
 
 Fundamentals
 
