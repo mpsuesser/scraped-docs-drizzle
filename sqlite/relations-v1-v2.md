@@ -2,8 +2,8 @@
 url: https://orm.drizzle.team/docs/sqlite/relations-v1-v2
 title: "Relations V1 V2"
 description: ""
-access_date: 2026-10-31T10:54:20.546Z
-current_date: 2026-10-31T10:54:20.546Z
+access_date: 2026-11-16T21:15:01.494Z
+current_date: 2026-11-16T21:15:01.494Z
 ---
 
 ## Migrating to Relational Queries version 2
@@ -143,7 +143,10 @@ export const relations = defineRelations(schema, (r) => ({
       from: r.users.invitedBy,
       to: r.users.id,
     }),
-    posts: r.many.posts(),
+    posts: r.many.posts({
+      from: r.users.id,
+      to: r.posts.authorId,
+    }),
   }
 }));
 

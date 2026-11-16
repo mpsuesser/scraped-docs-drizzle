@@ -2,8 +2,8 @@
 url: https://orm.drizzle.team/docs/singlestore/rqb-v2
 title: "Rqb V2"
 description: ""
-access_date: 2026-08-03T19:43:09.006Z
-current_date: 2026-08-03T19:43:09.006Z
+access_date: 2026-11-16T21:15:01.494Z
+current_date: 2026-11-16T21:15:01.494Z
 ---
 
 ## Drizzle Queries
@@ -474,7 +474,7 @@ Relational query API lets you add custom additional fields. It’s useful when y
 
 IMPORTANT
 
-As of now aggregations are not supported in `extras`, please use **[`core queries`](select.md)** for that.
+Aggregate functions over the rows of the queried table, such as `count(*)` or `sum(...)`, are not supported in `extras`. Relational queries do not add a `GROUP BY` clause. To count or sum related rows, use a subquery in `extras`, for example `db.$count(...)`. See [Include subqueries](#include-subqueries). For grouped results, use **[`core queries`](select.md)**.
 
 ```typescript
 import { sql } from 'drizzle-orm';

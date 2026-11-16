@@ -2,8 +2,8 @@
 url: https://orm.drizzle.team/docs/mssql/select
 title: "Select"
 description: ""
-access_date: 2026-08-03T19:43:09.006Z
-current_date: 2026-08-03T19:43:09.006Z
+access_date: 2026-11-16T21:15:01.494Z
+current_date: 2026-11-16T21:15:01.494Z
 ---
 
 ## SQL Select
@@ -71,6 +71,20 @@ const result = await db.select({
 ```
 ```sql
 select [id], lower([name]) from [users];
+```
+
+To select all columns of a table and add more fields, spread `getColumns(table)` into the selection object. In v1, `getTableColumns` is deprecated. Use `getColumns` instead:
+
+```typescript
+import { getColumns, sql } from 'drizzle-orm';
+
+const result = await db.select({
+  ...getColumns(users),
+  lowerName: sql<string>\`lower(${users.name})\`,
+}).from(users);
+```
+```sql
+select [id], [name], [age], lower([name]) from [users];
 ```
 
 IMPORTANT

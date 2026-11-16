@@ -2,8 +2,8 @@
 url: https://orm.drizzle.team/docs/relations
 title: "Relations"
 description: ""
-access_date: 2026-08-03T19:43:09.006Z
-current_date: 2026-08-03T19:43:09.006Z
+access_date: 2026-11-16T21:15:01.494Z
+current_date: 2026-11-16T21:15:01.494Z
 ---
 
 ## Drizzle relations
@@ -385,7 +385,10 @@ export const relations = defineRelations(schema, (r) => ({
       from: r.users.invitedBy,
       to: r.users.id,
     }),
-    posts: r.many.posts(),
+    posts: r.many.posts({
+      from: r.users.id,
+      to: r.posts.authorId,
+    }),
   }
 }));
 
@@ -429,7 +432,10 @@ export const relations = defineRelations(schema, (r) => ({
       from: r.users.invitedBy,
       to: r.users.id,
     }),
-    posts: r.many.posts(),
+    posts: r.many.posts({
+      from: r.users.id,
+      to: r.posts.authorId,
+    }),
   }
 }));
 
@@ -467,7 +473,7 @@ Having `{ ...relations, ...part }` will result in
 }
 ```
 
-and having `{ ...relations, ...part }` will result in
+and having `{ ...part, ...relations }` will result in
 
 ```json
 {
