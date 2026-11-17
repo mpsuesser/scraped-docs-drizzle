@@ -2,8 +2,8 @@
 url: https://orm.drizzle.team/docs/cockroach/tutorials/drizzle-with-vercel-edge-functions
 title: "Drizzle With Vercel Edge Functions"
 description: ""
-access_date: 2026-08-03T19:43:09.006Z
-current_date: 2026-08-03T19:43:09.006Z
+access_date: 2026-11-17T09:48:18.024Z
+current_date: 2026-11-17T09:48:18.024Z
 ---
 
 ## Drizzle with Vercel Edge Functions
@@ -109,17 +109,16 @@ Generate migrations:
 npx drizzle-kit generate
 ```
 
-These migrations are stored in the `drizzle` directory, as specified in your `drizzle.config.ts`. This directory will contain the SQL files necessary to update your database schema and a `meta` folder for storing snapshots of the schema at different migration stages.
+These migrations are stored in the `drizzle` directory by default. Each migration has its own timestamped folder containing a `migration.sql` file and a `snapshot.json` file.
 
 Example of a generated migration:
 
 ```sql
-CREATE TABLE IF NOT EXISTS "users_table" (
-    "id" serial PRIMARY KEY NOT NULL,
+CREATE TABLE "users_table" (
+    "id" serial PRIMARY KEY,
     "name" text NOT NULL,
     "age" text NOT NULL,
-    "email" text NOT NULL,
-    CONSTRAINT "users_table_email_unique" UNIQUE("email")
+    "email" text NOT NULL UNIQUE
 );
 ```
 
@@ -268,17 +267,16 @@ Generate migrations:
 npx drizzle-kit generate
 ```
 
-These migrations are stored in the `drizzle` directory, as specified in your `drizzle.config.ts`. This directory will contain the SQL files necessary to update your database schema and a `meta` folder for storing snapshots of the schema at different migration stages.
+These migrations are stored in the `drizzle` directory by default. Each migration has its own timestamped folder containing a `migration.sql` file and a `snapshot.json` file.
 
 Example of a generated migration:
 
 ```sql
-CREATE TABLE IF NOT EXISTS "users_table" (
-    "id" serial PRIMARY KEY NOT NULL,
+CREATE TABLE "users_table" (
+    "id" serial PRIMARY KEY,
     "name" text NOT NULL,
     "age" text NOT NULL,
-    "email" text NOT NULL,
-    CONSTRAINT "users_table_email_unique" UNIQUE("email")
+    "email" text NOT NULL UNIQUE
 );
 ```
 
@@ -383,13 +381,13 @@ npm i @planetscale/database
 Create a `schema.ts` file in the `src/db` directory and declare a table schema:
 
 ```typescript
-import { mysqlTable, serial, text } from "drizzle-orm/mysql-core";
+import { mysqlTable, serial, text, varchar } from "drizzle-orm/mysql-core";
 
 export const usersTable = mysqlTable('users_table', {
   id: serial('id').primaryKey(),
   name: text('name').notNull(),
   age: text('age').notNull(),
-  email: text('email').notNull().unique(),
+  email: varchar('email', { length: 255 }).notNull().unique(),
 })
 ```
 
@@ -427,18 +425,17 @@ Generate migrations:
 npx drizzle-kit generate
 ```
 
-These migrations are stored in the `drizzle` directory, as specified in your `drizzle.config.ts`. This directory will contain the SQL files necessary to update your database schema and a `meta` folder for storing snapshots of the schema at different migration stages.
+These migrations are stored in the `drizzle` directory by default. Each migration has its own timestamped folder containing a `migration.sql` file and a `snapshot.json` file.
 
 Example of a generated migration:
 
 ```sql
 CREATE TABLE \`users_table\` (
-    \`id\` serial AUTO_INCREMENT NOT NULL,
+    \`id\` serial PRIMARY KEY,
     \`name\` text NOT NULL,
     \`age\` text NOT NULL,
-    \`email\` text NOT NULL,
-    CONSTRAINT \`users_table_id\` PRIMARY KEY(\`id\`),
-    CONSTRAINT \`users_table_email_unique\` UNIQUE(\`email\`)
+    \`email\` varchar(255) NOT NULL,
+    CONSTRAINT \`email_unique\` UNIQUE INDEX(\`email\`)
 );
 ```
 
@@ -589,19 +586,17 @@ Generate migrations:
 npx drizzle-kit generate
 ```
 
-These migrations are stored in the `drizzle` directory, as specified in your `drizzle.config.ts`. This directory will contain the SQL files necessary to update your database schema and a `meta` folder for storing snapshots of the schema at different migration stages.
+These migrations are stored in the `drizzle` directory by default. Each migration has its own timestamped folder containing a `migration.sql` file and a `snapshot.json` file.
 
 Example of a generated migration:
 
 ```sql
 CREATE TABLE \`users_table\` (
-    \`id\` integer PRIMARY KEY NOT NULL,
+    \`id\` integer PRIMARY KEY,
     \`name\` text NOT NULL,
     \`age\` text NOT NULL,
-    \`email\` text NOT NULL
+    \`email\` text NOT NULL UNIQUE
 );
---> statement-breakpoint
-CREATE UNIQUE INDEX \`users_table_email_unique\` ON \`users_table\` (\`email\`);
 ```
 
 Run migrations:

@@ -2,8 +2,8 @@
 url: https://orm.drizzle.team/docs/mssql/tutorials/drizzle-nextjs-neon
 title: "Drizzle Nextjs Neon"
 description: ""
-access_date: 2026-08-03T19:43:09.006Z
-current_date: 2026-08-03T19:43:09.006Z
+access_date: 2026-11-17T09:48:18.024Z
+current_date: 2026-11-17T09:48:18.024Z
 ---
 
 ## Todo App with Neon Postgres
@@ -122,13 +122,13 @@ Generate migrations:
 npx drizzle-kit generate
 ```
 
-These migrations are stored in the `drizzle/migrations` directory, as specified in your `drizzle.config.ts`. This directory will contain the SQL files necessary to update your database schema and a `meta` folder for storing snapshots of the schema at different migration stages.
+These migrations are stored in the `migrations` directory, as specified in your `drizzle.config.ts`. Each migration has its own timestamped folder containing a `migration.sql` file and a `snapshot.json` file.
 
 Example of a generated migration:
 
 ```sql
-CREATE TABLE IF NOT EXISTS "todo" (
-    "id" integer PRIMARY KEY NOT NULL,
+CREATE TABLE "todo" (
+    "id" integer PRIMARY KEY,
     "text" text NOT NULL,
     "done" boolean DEFAULT false NOT NULL
 );
@@ -377,8 +377,9 @@ This guide uses the following file structure:
 ```text
 📦 <project root>
  ├ 📂 migrations
- │  ├ 📂 meta
- │  └ 📜 0000_heavy_doctor_doom.sql
+ │  └ 📂 20261116104358_foamy_micromax
+ │     ├ 📜 migration.sql
+ │     └ 📜 snapshot.json
  ├ 📂 public
  ├ 📂 src
  │  ├ 📂 actions

@@ -2,8 +2,8 @@
 url: https://orm.drizzle.team/docs/mssql/tutorials/drizzle-with-neon
 title: "Drizzle With Neon"
 description: ""
-access_date: 2026-08-03T19:43:09.006Z
-current_date: 2026-08-03T19:43:09.006Z
+access_date: 2026-11-17T09:48:18.024Z
+current_date: 2026-11-17T09:48:18.024Z
 ---
 
 ## Drizzle with Neon Postgres
@@ -134,13 +134,13 @@ Generate migrations:
 npx drizzle-kit generate
 ```
 
-These migrations are stored in the `drizzle/migrations` directory, as specified in your `drizzle.config.ts`. This directory will contain the SQL files necessary to update your database schema and a `meta` folder for storing snapshots of the schema at different migration stages.
+These migrations are stored in the `migrations` directory, as specified in your `drizzle.config.ts`. Each migration has its own timestamped folder containing a `migration.sql` file and a `snapshot.json` file.
 
 Example of a generated migration:
 
 ```sql
-CREATE TABLE IF NOT EXISTS "posts_table" (
-    "id" serial PRIMARY KEY NOT NULL,
+CREATE TABLE "posts_table" (
+    "id" serial PRIMARY KEY,
     "title" text NOT NULL,
     "content" text NOT NULL,
     "user_id" integer NOT NULL,
@@ -148,19 +148,14 @@ CREATE TABLE IF NOT EXISTS "posts_table" (
     "updated_at" timestamp NOT NULL
 );
 --> statement-breakpoint
-CREATE TABLE IF NOT EXISTS "users_table" (
-    "id" serial PRIMARY KEY NOT NULL,
+CREATE TABLE "users_table" (
+    "id" serial PRIMARY KEY,
     "name" text NOT NULL,
     "age" integer NOT NULL,
-    "email" text NOT NULL,
-    CONSTRAINT "users_table_email_unique" UNIQUE("email")
+    "email" text NOT NULL UNIQUE
 );
 --> statement-breakpoint
-DO $$ BEGIN
- ALTER TABLE "posts_table" ADD CONSTRAINT "posts_table_user_id_users_table_id_fk" FOREIGN KEY ("user_id") REFERENCES "public"."users_table"("id") ON DELETE cascade ON UPDATE no action;
-EXCEPTION
- WHEN duplicate_object THEN null;
-END $$;
+ALTER TABLE "posts_table" ADD CONSTRAINT "posts_table_user_id_users_table_id_fkey" FOREIGN KEY ("user_id") REFERENCES "users_table"("id") ON DELETE CASCADE;
 ```
 
 Run migrations:
@@ -181,7 +176,7 @@ Push command is good for situations where you need to quickly test new schema de
 
 ### Basic file structure
 
-This is the basic file structure of the project. In the `src/db` directory, we have database-related files including connection in `db.ts`, schema definitions in `schema.ts`, and a migration script in `migrate.ts` file which is responsible for applying migrations that stored in the `migrations` directory.
+This is the basic file structure of the project. The `src` directory contains the database connection in `db.ts` and schema definitions in `schema.ts`. Drizzle Kit generates migrations in the `migrations` directory and applies them with `drizzle-kit migrate`.
 
 ```plaintext
 📦 <project root>
@@ -189,10 +184,9 @@ This is the basic file structure of the project. In the `src/db` directory, we h
  │  ├ 📜 db.ts
  │  └ 📜 schema.ts
  ├ 📂 migrations
- │  ├ 📂 meta
- │  │  ├ 📜 _journal.json
- │  │  └ 📜 0000_snapshot.json
- │  └ 📜 0000_dry_richard_fisk.sql
+ │  └ 📂 20261116103058_sweet_lockheed
+ │     ├ 📜 migration.sql
+ │     └ 📜 snapshot.json
  ├ 📜 .env
  ├ 📜 drizzle.config.ts
  ├ 📜 package.json

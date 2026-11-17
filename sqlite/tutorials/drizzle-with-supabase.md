@@ -2,13 +2,15 @@
 url: https://orm.drizzle.team/docs/sqlite/tutorials/drizzle-with-supabase
 title: "Drizzle With Supabase"
 description: ""
-access_date: 2026-08-03T19:43:09.006Z
-current_date: 2026-08-03T19:43:09.006Z
+access_date: 2026-11-17T09:48:18.024Z
+current_date: 2026-11-17T09:48:18.024Z
 ---
 
 ## Drizzle with Supabase Database
 
 This tutorial demonstrates how to use Drizzle ORM with [Supabase Database](https://supabase.com/docs/guides/database/overview). Every Supabase project comes with a full [Postgres](https://www.postgresql.org/docs) database.
+
+Upgrading an existing Drizzle project? Follow the [upgrade guide](../../upgrade-v1.md) before continuing with this tutorial.
 
 This guide assumes familiarity with:
 
@@ -31,8 +33,6 @@ npm i dotenv
 npm i postgres
 ```
 
-- You should have the latest version of [Supabase CLI](https://supabase.com/docs/guides/cli/getting-started#installing-the-supabase-cli) installed (Only if you want to use the Supabase CLI for migrations)
-
 Check [Supabase documentation](https://supabase.com/docs/guides/database/connecting-to-postgres#connecting-with-drizzle) to learn how to connect to the database with Drizzle ORM.
 
 ## Setup Supabase and Drizzle ORM
@@ -43,7 +43,7 @@ You can create new Supabase project in the [dashboard](https://supabase.com/dash
 
 #### Setup connection string variable
 
-Navigate to [Database Settings](https://supabase.com/dashboard/project/_/settings/database) and copy the URI from the `Connection String` section. Make sure to use `connection pooling`. Remember to replace the password placeholder with your actual database password.
+Click **Connect** in your Supabase project dashboard and copy the **Direct connection** URI. If your network only supports IPv4, use the **Session pooler** URI instead. This connection is used by both Drizzle ORM and Drizzle Kit migrations. Replace the password placeholder with your database password.
 
 Add `DATABASE_URL` variable to your `.env` or `.env.local` file.
 
@@ -116,7 +116,7 @@ config({ path: '.env' });
 
 export default defineConfig({
   schema: './src/db/schema.ts',
-  out: './supabase/migrations',
+  out: './drizzle',
   dialect: 'postgresql',
   dbCredentials: {
     url: process.env.DATABASE_URL!,
@@ -134,13 +134,13 @@ Generate migrations:
 npx drizzle-kit generate
 ```
 
-These migrations are stored in the `supabase/migrations` directory, as specified in your `drizzle.config.ts`. This directory will contain the SQL files necessary to update your database schema and a `meta` folder for storing snapshots of the schema at different migration stages.
+These migrations are stored in the `drizzle` directory, as specified in your `drizzle.config.ts`. Each migration has its own timestamped folder containing a `migration.sql` file and a `snapshot.json` file.
 
 Example of a generated migration:
 
 ```sql
-CREATE TABLE IF NOT EXISTS "posts_table" (
-    "id" serial PRIMARY KEY NOT NULL,
+CREATE TABLE "posts_table" (
+    "id" serial PRIMARY KEY,
     "title" text NOT NULL,
     "content" text NOT NULL,
     "user_id" integer NOT NULL,
@@ -148,19 +148,14 @@ CREATE TABLE IF NOT EXISTS "posts_table" (
     "updated_at" timestamp NOT NULL
 );
 --> statement-breakpoint
-CREATE TABLE IF NOT EXISTS "users_table" (
-    "id" serial PRIMARY KEY NOT NULL,
+CREATE TABLE "users_table" (
+    "id" serial PRIMARY KEY,
     "name" text NOT NULL,
     "age" integer NOT NULL,
-    "email" text NOT NULL,
-    CONSTRAINT "users_table_email_unique" UNIQUE("email")
+    "email" text NOT NULL UNIQUE
 );
 --> statement-breakpoint
-DO $$ BEGIN
- ALTER TABLE "posts_table" ADD CONSTRAINT "posts_table_user_id_users_table_id_fk" FOREIGN KEY ("user_id") REFERENCES "users_table"("id") ON DELETE cascade ON UPDATE no action;
-EXCEPTION
- WHEN duplicate_object THEN null;
-END $$;
+ALTER TABLE "posts_table" ADD CONSTRAINT "posts_table_user_id_users_table_id_fkey" FOREIGN KEY ("user_id") REFERENCES "users_table"("id") ON DELETE CASCADE;
 ```
 
 Run migrations:
@@ -169,9 +164,7 @@ Run migrations:
 npx drizzle-kit migrate
 ```
 
-Learn more about [migration process](../../migrations.md). You can also apply migrations using [Supabase CLI](https://supabase.com/docs/guides/cli/getting-started):
-
-- For tables that already exist, manually review the generated migration files from `npx drizzle-kit generate` and comment out or adjust any unsafe pure create statements (e.g., `CREATE SCHEMA "auth";`) while ensuring safe conditional creates (e.g., `CREATE TABLE IF NOT EXISTS "auth"."users"`) are properly handled.
+Learn more about the [migration process](../../migrations.md). Drizzle Kit manages the migrations in this tutorial. To use Supabase as your migration runner instead, follow the [optional Supabase CLI workflow](#optional-manage-migrations-with-supabase-cli).
 
 Alternatively, you can push changes directly to the database using [Drizzle kit push command](../../kit-overview.md#prototyping-with-db-push):
 
@@ -183,31 +176,45 @@ IMPORTANT
 
 Push command is good for situations where you need to quickly test new schema designs or changes in a local development environment, allowing for fast iterations without the overhead of managing migration files.
 
-To apply migrations using the Supabase CLI you should follow these steps:
+## Optional: manage migrations with Supabase CLI
 
-Generate migrations using Drizzle Kit:
+If you want Supabase to apply migrations, keep Drizzle Kit for generating SQL and use Supabase CLI as the migration runner. Choose this workflow before applying your first migration. The commands below use [Supabase CLI 3.x](https://supabase.com/docs/guides/cli/getting-started).
 
-```bash
-npx drizzle-kit generate
-```
-
-Initialize the local Supabase project:
+Initialize a local Supabase project if you have not already done so:
 
 ```bash
 supabase init
 ```
 
-Link it to your remote project:
+Generate a migration from your Drizzle schema:
 
 ```bash
-supabase link
+npx drizzle-kit generate
 ```
 
-Push changes to the database:
+Drizzle Kit creates a folder containing `migration.sql` and `snapshot.json`. Supabase expects flat `<timestamp>_<name>.sql` files in `supabase/migrations` and skips subdirectories. Create a Supabase migration using the generated SQL:
 
 ```bash
-supabase db push
+supabase migration new create_tables < drizzle/20261116131610_moaning_turbo/migration.sql
 ```
+
+Replace the example folder with the one produced by `drizzle-kit generate`. Repeat this export once for each new migration, in generation order. Keep both directories in version control: Drizzle uses its snapshots to generate subsequent changes; Supabase uses its SQL files and migration history to apply them.
+
+Start your local Supabase stack with Docker running, then apply pending migrations:
+
+```bash
+supabase start
+supabase migration up
+```
+
+To deploy to a hosted project with Supabase CLI 3.x, link the project and explicitly select the remote target:
+
+```bash
+supabase link --project-ref=<REFERENCE_ID>
+supabase db push --remote
+```
+
+In this workflow, Supabase applies the SQL and owns the migration history. Use `drizzle-kit generate` for schema changes and export each new SQL file; use Supabase CLI to apply it. Do not also run `drizzle-kit migrate` or `drizzle-kit push` against the same database. If you have already applied migrations with Drizzle Kit, reconcile the existing schema and migration history before switching runners rather than replaying those migrations.
 
 ## Basic file structure
 
@@ -219,13 +226,10 @@ This is the basic file structure of the project. In the `src/db` directory, we h
  │   ├ 📂 db
  │   │  ├ 📜 index.ts
  │   │  └ 📜 schema.ts
- ├ 📂 supabase
- │   ├ 📂 migrations
- │   │  ├ 📂 meta
- │   │  │  ├ 📜 _journal.json
- │   │  │  └ 📜 0000_snapshot.json
- │   │  └ 📜 0000_watery_spencer_smythe.sql
- │   └ 📜 config.toml
+ ├ 📂 drizzle
+ │   └ 📂 20261116131610_moaning_turbo
+ │      ├ 📜 migration.sql
+ │      └ 📜 snapshot.json
  ├ 📜 .env
  ├ 📜 drizzle.config.ts
  ├ 📜 package.json
@@ -256,12 +260,6 @@ export async function createPost(data: InsertPost) {
 #### Select data
 
 Read more about select query in the [documentation](../../select.md).
-
-IMPORTANT
-
-`getColumns` available starting from `drizzle-orm@1.0.0-beta.2` (read more [here](../../upgrade-v1.md))
-
-If you are on pre-1 version(like `0.45.1`) then use `getTableColumns`
 
 ```typescript
 import { asc, between, count, eq, getColumns, sql } from 'drizzle-orm';

@@ -2,22 +2,31 @@
 url: https://orm.drizzle.team/docs/tutorials/drizzle-with-supabase-edge-functions
 title: "Drizzle With Supabase Edge Functions"
 description: ""
-access_date: 2026-08-03T19:43:09.006Z
-current_date: 2026-08-03T19:43:09.006Z
+access_date: 2026-11-17T09:48:18.024Z
+current_date: 2026-11-17T09:48:18.024Z
 ---
 
 ## Drizzle with Supabase Edge Functions
 
 This tutorial demonstrates how to use Drizzle ORM with [Supabase Edge Functions](https://supabase.com/docs/guides/functions).
 
+Upgrading an existing Drizzle project? Follow the [upgrade guide](../upgrade-v1.md) before continuing with this tutorial.
+
 This guide assumes familiarity with:
 
 - You should have the latest version of [Supabase CLI](https://supabase.com/docs/guides/cli/getting-started#installing-the-supabase-cli) installed.
-- You should have installed Drizzle ORM and [Drizzle kit](https://orm.drizzle.team/kit-docs/overview). You can do this by running the following command:
+- You should have installed Drizzle ORM and [Drizzle kit](../kit-overview.md). You can do this by running the following command:
 
 ```shell
 npm i drizzle-orm@rc
 npm i -D drizzle-kit@rc
+```
+
+- Install `dotenv` for the Drizzle config and `postgres` for the database connection:
+
+```shell
+npm i dotenv
+npm i postgres
 ```
 
 - You should have installed Docker Desktop. It is a prerequisite for local development. Follow the official [docs](https://docs.docker.com/desktop) to install.
@@ -42,17 +51,21 @@ This file will be used to generate migrations for your database.
 
 #### Setup Drizzle config file
 
-**Drizzle config** - a configuration file that is used by [Drizzle Kit](https://orm.drizzle.team/kit-docs/overview) and contains all the information about your database connection, migration folder and schema files.
+**Drizzle config** - a configuration file that is used by [Drizzle Kit](../kit-overview.md) and contains all the information about your database connection, migration folder and schema files.
 
 Create a `drizzle.config.ts` file in the root of your project and add the following content:
 
 ```typescript
+import "dotenv/config";
 import { defineConfig } from "drizzle-kit";
 
 export default defineConfig({
   schema: "./src/schema.ts",
-  out: "./supabase/migrations",
+  out: "./drizzle",
   dialect: "postgresql",
+  dbCredentials: {
+    url: process.env.DATABASE_URL!,
+  },
 });
 ```
 
@@ -83,7 +96,7 @@ Run the `drizzle-kit generate` command to generate migrations:
 npx drizzle-kit generate
 ```
 
-It will create a new migration file in the `supabase/migrations` directory:
+These migrations are stored in the `drizzle` directory, as specified in your `drizzle.config.ts`. Each migration has its own timestamped folder containing a `migration.sql` file and a `snapshot.json` file.
 
 #### Apply migrations
 
@@ -93,19 +106,27 @@ To start the Supabase local development stack, run the following command:
 supabase start
 ```
 
-To apply migrations, run the following command:
+Copy the local database connection string from `supabase status` into a `.env` file in your project root:
 
-```bash
-supabase migration up
+```text
+DATABASE_URL=postgresql://postgres:postgres@127.0.0.1:54322/postgres
 ```
 
-You can read more about Supabase migrations in the [documentation](https://supabase.com/docs/guides/deployment/database-migrations).
+This example uses the default local port. Use the URL printed by your CLI if your configuration differs.
+
+Apply the generated migrations with Drizzle Kit:
+
+```bash
+npx drizzle-kit migrate
+```
+
+Drizzle Kit manages this tutorial’s application tables. Supabase CLI manages the local services and Edge Functions. Keep Drizzle’s migration folders in `drizzle`. If you prefer Supabase-managed migrations, follow the [optional Supabase CLI workflow](drizzle-with-supabase.md#optional-manage-migrations-with-supabase-cli) instead of the Kit migration commands in this tutorial, including the hosted migration step below.
 
 IMPORTANT
 
 Don’t forget to run Docker
 
-Alternatively, you can apply migrations using the `drizzle-kit migrate` command. Learn more about this migration process in the [documentation](../migrations.md).
+Learn more about the [Drizzle migration process](../migrations.md).
 
 #### Create a new Edge Function
 
@@ -135,11 +156,13 @@ Add the following imports to the `deno.json` file in the `supabase/functions/dri
 ```json
 {
   "imports": {
-    "drizzle-orm/": "npm:/drizzle-orm/",
-    "postgres": "npm:postgres"
+    "drizzle-orm": "npm:drizzle-orm@1.0.0-rc.5",
+    "postgres": "npm:postgres@3.4.7"
   }
 }
 ```
+
+Keep the ORM version in `deno.json` aligned with the version installed in your project. This example uses `drizzle-orm@1.0.0-rc.5`.
 
 You can read more about managing dependencies [here](https://supabase.com/docs/guides/functions/dependencies#managing-dependencies).
 
@@ -195,7 +218,7 @@ const usersTable = pgTable('users_table', {
 Deno.serve(async () => {
   const connectionString = Deno.env.get("SUPABASE_DB_URL")!;
 
-  // Disable prefetch as it is not supported for "Transaction" pool mode
+  // Disable prepared statements for transaction pooling
   const client = postgres(connectionString, { prepare: false });
   const db = drizzle({ client });
 
@@ -243,11 +266,15 @@ Copy the `Reference ID` from project settings and use it to link your local deve
 supabase link --project-ref=<REFERENCE_ID>
 ```
 
-Push your schema changes to the hosted Supabase project by running the following command:
+Click **Connect** in the hosted project’s dashboard and copy the **Direct connection** URI, or the **Session pooler** URI for an IPv4-only network. Update `DATABASE_URL` in your local `.env` file with that hosted database URI, replacing the password placeholder.
+
+Apply the same Drizzle migrations to the hosted database:
 
 ```bash
-supabase db push
+npx drizzle-kit migrate
 ```
+
+The `.env` file is used by Drizzle Kit on your machine. Configure the deployed function’s connection separately in the next step.
 
 #### Setup environment variables
 
