@@ -2,8 +2,8 @@
 url: https://orm.drizzle.team/docs/sqlite/agents
 title: "Agents"
 description: ""
-access_date: 2026-11-12T09:15:29.353Z
-current_date: 2026-11-12T09:15:29.353Z
+access_date: 2026-11-17T09:26:36.772Z
+current_date: 2026-11-17T09:26:36.772Z
 ---
 
 ## Set up your AI agent
@@ -20,7 +20,7 @@ View prompt
 ```
 Set up my coding agent for Drizzle in this project. Fetch and follow the instructions at https://orm.drizzle.team/agent-setup/prompt.md
 ```
-[Read the full setup instructions](https://orm.drizzle.team/agent-setup/prompt.md)
+[Read setup instructions](https://orm.drizzle.team/agent-setup/prompt.md)
 
 ## What setup does
 

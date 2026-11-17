@@ -2,50 +2,98 @@
 url: https://orm.drizzle.team/docs/sqlite/upgrade-v1
 title: "Upgrade V1"
 description: ""
-access_date: 2026-08-03T19:43:09.006Z
-current_date: 2026-08-03T19:43:09.006Z
+access_date: 2026-11-17T09:26:36.772Z
+current_date: 2026-11-17T09:26:36.772Z
 ---
 
 ## Upgrading to Drizzle v1
+
+Upgrade from Drizzle 0.x or an earlier v1 beta or RC to `drizzle-orm@rc` and `drizzle-kit@rc`.
+
+## Upgrade with an AI agent
+
+Let your coding agent prepare the upgrade without applying database changes.
+
+View prompt
+```
+Upgrade this project to Drizzle v1 using drizzle-orm@rc and drizzle-kit@rc. Fetch and follow the instructions at https://orm.drizzle.team/agent-upgrade/v1/prompt.md
+```
+[Read upgrade instructions](https://orm.drizzle.team/agent-upgrade/v1/prompt.md)
+
+## 1\. Update your packages
+
+Back up your database and migration files before converting the history.
+
+Update both packages:
 
 ```shell
 npm i drizzle-orm@rc
 npm i -D drizzle-kit@rc
 ```
 
-#### Step 1 - Run drizzle-kit up
-
-> v3 migration folder discussion: [https://github.com/drizzle-team/drizzle-orm/discussions/2832](https://github.com/drizzle-team/drizzle-orm/discussions/2832)
-
-We’ve updated the migrations folder structure by:
-
-- removing `journal.json`
-- grouping SQL files and snapshots into separate migration folders
-- removing the `drizzle-kit drop` command
-
-These changes eliminate potential Git conflicts with the journal file and simplify the process of dropping or fixing conflicted migrations
-
-The drizzle-kit has been architecturally redesigned:
-
-- Migrated from database snapshots to DDL snapshots
-
-Commutativity checks were added:
-
-- Detecting non-commutative migrations across branches
-
-> Commutativity discussion: [https://github.com/drizzle-team/drizzle-orm/discussions/5005](https://github.com/drizzle-team/drizzle-orm/discussions/5005)
-
-To migrate from old structure to a new one you would need to run
+## 2\. Convert your migration files
 
 ```shell
 npx drizzle-kit up
 ```
 
-#### Step 2 - Review breaking changes
+`up` converts local files without changing the database. Each migration gets its own folder, named from the old journal’s timestamp and migration name:
 
-You can find out the full list of breaking changes [here](v0-v1-changes.md#breaking-changes) and make sure to update your code accordingly
+```plaintext
+# Before: Drizzle 0.x
+ drizzle/
+ ├ 0000_create_users.sql
+ └ meta/
+   ├ 0000_snapshot.json
+   └ _journal.json
 
-If you were using Relational Queries, you need to upgrade to v2:
+# After: Drizzle v1
+ drizzle/
+ └ 20260101120000_create_users/
+   ├ migration.sql
+   └ snapshot.json
+```
 
-- [How to migrate relations definition from v1 to v2](relations-v1-v2.md#how-to-migrate-relations-schema-definition-from-v1-to-v2)
-- [How to migrate queries from v1 to v2](relations-v1-v2.md#how-to-migrate-queries-from-v1-to-v2)
+The SQL is preserved, snapshots move to a DDL-based format and `meta/_journal.json` is removed. Removing the shared journal avoids Git conflicts in that file and makes migration conflicts easier to resolve. `drizzle-kit drop` has been removed.
+
+See the [v3 migration folder discussion](https://github.com/drizzle-team/drizzle-orm/discussions/2832) for the design and background.
+
+If conversion reports missing SQL files or snapshots, restore them from Git instead of deleting applied migrations.
+
+## 3\. Update your application code
+
+Review the [breaking changes](v0-v1-changes.md#breaking-changes) for your dialect and update the affected code.
+
+If you use Relational Queries, migrate your [relation definitions](relations-v1-v2.md#how-to-migrate-relations-schema-definition-from-v1-to-v2) and [queries](relations-v1-v2.md#how-to-migrate-queries-from-v1-to-v2) to v2.
+
+## 4\. Check the converted history
+
+```shell
+npx drizzle-kit check
+```
+
+Review the Git diff: every previous migration should have its converted folder, with unchanged SQL. `check` validates the local history and detects non-commutative migrations across branches, such as one branch renaming a table that another alters. It does not verify the applied history in your database.
+
+See the [commutativity discussion](https://github.com/drizzle-team/drizzle-orm/discussions/5005) for the reasoning behind these checks.
+
+Resolve reported conflicts before migrating. Deleting or regenerating an already-applied migration can require resetting the database that ran it.
+
+## 5\. Run your migrations
+
+Run your migrations as usual, using your application’s `migrate()` function or the Kit CLI:
+
+```shell
+npx drizzle-kit migrate
+```
+
+On the first run after upgrading, the migrator updates the existing migration history table. It adds `name` and `applied_at` and associates previously applied migrations with their converted folders. `applied_at` remains `NULL` for older migrations because their execution date was not recorded.
+
+Previously applied migrations are marked as applied in the updated history. Their SQL is not executed a second time. Any pending migrations are then applied.
+
+This also applies pending migrations
+
+After upgrading the history, the migrator applies every local migration whose full folder name is missing from the database, even if its timestamp is older than the latest applied migration. Keep folder names stable after this upgrade.
+
+If a database history entry cannot be matched, the upgrade stops. Restore the corresponding local migration rather than deleting the database history or creating a new initial migration.
+
+Verify that previously applied migrations were not rerun and only expected pending migrations ran.
