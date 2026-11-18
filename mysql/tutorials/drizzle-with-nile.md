@@ -2,17 +2,15 @@
 url: https://orm.drizzle.team/docs/mysql/tutorials/drizzle-with-nile
 title: "Drizzle With Nile"
 description: ""
-access_date: 2026-08-03T19:43:09.006Z
-current_date: 2026-08-03T19:43:09.006Z
+access_date: 2026-11-18T08:29:58.297Z
+current_date: 2026-11-18T08:29:58.297Z
 ---
 
 ## Drizzle with Nile Database
 
-This tutorial demonstrates how to use Drizzle ORM with [Nile Database](https://thenile.dev/). Nile is Postgres, re-engineered for multi-tenant applications.
+Build a tenant-aware Express API with the Drizzle ORM and Drizzle Kit v1 release candidate. [Nile](https://thenile.dev/) provides the PostgreSQL database and routes queries to a tenant’s virtual database using the tenant context set by your application.
 
-This tutorial will demonstrate how to use Drizzle with Nile’s virtual tenant databases to developer a secure, scalable, multi-tenant application.
-
-We’ll walk through building this example application step-by-step. If you want to peek at the complete example, you can take a look at its [Github repository](https://github.com/niledatabase/niledatabase/tree/main/examples/quickstart/drizzle).
+You can also explore [Nile’s Drizzle example](https://github.com/niledatabase/niledatabase/tree/main/examples/quickstart/drizzle).
 
 This guide assumes familiarity with:
 
@@ -29,16 +27,21 @@ npm i -D drizzle-kit@rc
 npm i dotenv
 ```
 
-- You should have installed `node-postgres` package for connecting to the Postgres database. Read more about this package [here](https://www.npmjs.com/package/node-postgres)
+- You should have installed `pg` package for connecting to the Postgres database. Read more about this package [here](https://node-postgres.com/)
 
 ```shell
-npm i node-postgres
+npm i pg
+npm i -D @types/pg
 ```
 
-- You should have installed `express` package for the web framework. Read more about express [here](https://expressjs.com/)
+- You should have installed `express` package for the web framework. This example uses Express 4 routing syntax. Read more about Express [here](https://expressjs.com/)
 
 ```shell
-npm i express
+npm i express@4
+npm i -D @types/express@4
+npm i -D tsx
+npm i -D typescript
+npm i -D @types/node
 ```
 
 - This guide uses [AsyncLocalStorage](https://nodejs.org/api/async_context.html) to manage the tenant context. If your framework or runtime does not support `AsyncLocalStorage`, you can refer to [Drizzle<>Nile](../../connect-nile.md) doc for alternative options.
@@ -54,7 +57,7 @@ If you haven’t already, sign up to [Nile](https://console.thenile.dev/) and fo
 On the left side-bar menu, select the “Settings” option, click on the Postgres logo, and click “generate credentials”. Copy the connection string and add it to the `.env` file in your project:
 
 ```plaintext
-NILEDB_URL=postgres://youruser:yourpassword@us-west-2.db.thenile.dev:5432:5432/your_db_name
+NILEDB_URL=postgres://youruser:yourpassword@us-west-2.db.thenile.dev:5432/your_db_name
 ```
 
 #### Connect Drizzle ORM to your database
@@ -63,11 +66,11 @@ Create a `db.ts` file in the `src/db` directory and set up your database configu
 
 ```typescript
 import { drizzle } from 'drizzle-orm/node-postgres';
-import dotenv from "dotenv/config";
+import "dotenv/config";
 import { sql } from "drizzle-orm";
-import { AsyncLocalStorage } from "async_hooks";
+import { AsyncLocalStorage } from "node:async_hooks";
 
-export const db = drizzle(process.env.NILEDB_URL);
+export const db = drizzle(process.env.NILEDB_URL!);
 export const tenantContext = new AsyncLocalStorage<string | undefined>();
 
 export function tenantDB<T>(cb: (tx: any) => T | Promise<T>): Promise<T> {
@@ -76,7 +79,7 @@ export function tenantDB<T>(cb: (tx: any) => T | Promise<T>): Promise<T> {
     console.log("executing query with tenant: " + tenantId);
     // if there's a tenant ID, set it in the transaction context
     if (tenantId) {
-      await tx.execute(sql\`set local nile.tenant_id = '${sql.raw(tenantId)}'\`);
+      await tx.execute(sql\`select set_config('nile.tenant_id', ${tenantId}, true)\`);
     }
 
     return cb(tx);
@@ -105,50 +108,35 @@ export default defineConfig({
 
 #### Introspect Nile database
 
-Nile databases have built-in tables. The most important of these is the `tenants` table, which is used to create and manage tenants. In order to use this table from our application, we’ll use Drizzle Kit CLI to generate a schema file that includes this schema.
+Your new Nile database already contains built-in tables, including `tenants`, which you will use to create and list tenants. Run `pull --init` to generate their Drizzle definitions and record the existing schema as the applied baseline. This writes migration bookkeeping to your tutorial database, so subsequent migrations do not try to create the built-in tables again.
 
 ```bash
-npx drizzle-kit pull
+npx drizzle-kit pull --init
 ```
 
-The result of introspection will be a `schema.ts` file, `meta` folder with snapshots of your database schema, sql file with the migration and `relations.ts` file for [relational queries](../../rqb.md).
+In v1, an initial pull writes `drizzle/schema.ts`, `drizzle/relations.ts`, and a timestamped folder containing `migration.sql` and `snapshot.json`. Keep that migration folder: later generations use its snapshot as the baseline.
 
-We recommend transferring the generated code from `drizzle/schema.ts` and `drizzle/relations.ts` to the actual schema file. In this guide we transferred code to `src/db/schema.ts`. Generated files for schema and relations can be deleted. This way you can manage your schema in a more structured way.
+Copy `drizzle/schema.ts` to `src/db/schema.ts`. Keep every table and declaration returned by introspection when adding your application tables below. This tutorial uses SQL queries and does not need the generated `relations.ts` file.
 
-```plaintext
-├ 📂 drizzle
-│ ├ 📂 20242409125510_premium_mister_fear
-│ │ ├ 📜 snapshot.json
-│ │ └ 📜 migration.sql
-│ ├ 📜 relations.ts ────────┐
-│ └ 📜 schema.ts ───────────┤
-├ 📂 src                    │ 
-│ ├ 📂 db                   │
-│ │ ├ 📜 relations.ts <─────┤
-│ │ └ 📜 schema.ts <────────┘
-│ └ 📜 index.ts         
-└ …
-```
-
-Here is an example of the generated `schema.ts` file:
+Here is an excerpt showing the `tenants` table. The exact defaults and other built-in tables depend on your Nile database. Keep the definitions returned by your own pull:
 
 ```typescript
 // table schema generated by introspection
-import { pgTable, uuid, text, timestamp, varchar, vector, boolean } from "drizzle-orm/pg-core"
+import { pgTable, uuid, text, timestamp } from "drizzle-orm/pg-core"
 import { sql } from "drizzle-orm"
 
 export const tenants = pgTable("tenants", {
-    id: uuid().default(sql\`public.uuid_generate_v7()\`).primaryKey().notNull(),
+    id: uuid().default(sql\`uuid_generate_v7()\`).primaryKey(),
     name: text(),
-    created: timestamp({ mode: 'string' }).default(sql\`LOCALTIMESTAMP\`).notNull(),
-    updated: timestamp({ mode: 'string' }).default(sql\`LOCALTIMESTAMP\`).notNull(),
-    deleted: timestamp({ mode: 'string' }),
+    created: timestamp().default(sql\`LOCALTIMESTAMP\`).notNull(),
+    updated: timestamp().default(sql\`LOCALTIMESTAMP\`).notNull(),
+    deleted: timestamp(),
 });
 ```
 
 #### Create additional tables
 
-In addition to the built-in tables, our application will need some tables to store its data. We will add them to `src/db/schema.ts` that we previously generated, so this file will look like this:
+Add the `todos` table to `src/db/schema.ts`, preserving every introspected definition. The following excerpt shows `tenants` and the new application table:
 
 ```typescript
 // table schema generated by introspection
@@ -156,11 +144,11 @@ import { pgTable, uuid, text, timestamp, varchar, vector, boolean } from "drizzl
 import { sql } from "drizzle-orm"
 
 export const tenants = pgTable("tenants", {
-    id: uuid().default(sql\`public.uuid_generate_v7()\`).primaryKey().notNull(),
+    id: uuid().default(sql\`uuid_generate_v7()\`).primaryKey(),
     name: text(),
-    created: timestamp({ mode: 'string' }).default(sql\`LOCALTIMESTAMP\`).notNull(),
-    updated: timestamp({ mode: 'string' }).default(sql\`LOCALTIMESTAMP\`).notNull(),
-    deleted: timestamp({ mode: 'string' }),
+    created: timestamp().default(sql\`LOCALTIMESTAMP\`).notNull(),
+    updated: timestamp().default(sql\`LOCALTIMESTAMP\`).notNull(),
+    deleted: timestamp(),
 });
 
 export const todos = pgTable("todos", {
@@ -175,41 +163,27 @@ export const todos = pgTable("todos", {
 
 #### Apply changes to the database
 
-You can directly apply changes to your database using the `drizzle-kit push` command. This is a convenient method for quickly testing new schema designs or modifications in a local development environment, allowing for rapid iterations without the need to manage migration files:
-
-```bash
-npx drizzle-kit push
-```
-
-Read more about the push command in [documentation](../../drizzle-kit-push.md).
-
-Tips
-
-Alternatively, you can generate migrations using the `drizzle-kit generate` command and then apply them using the `drizzle-kit migrate` command:
-
-Generate migrations:
+Generate a migration for the new application table:
 
 ```bash
 npx drizzle-kit generate
 ```
 
-Apply migrations:
+Review the new `migration.sql`. It should create `todos` without dropping or recreating Nile’s built-in tables. Then apply it:
 
 ```bash
 npx drizzle-kit migrate
 ```
 
-Read more about migration process in [documentation](../../kit-overview.md).
+Keep both migration folders and their snapshots in version control.
 
 #### Initialize the webapp
 
-Now that we have set up Drizzle to connect to Nile and we have our schema in place, we can use them in a multi-tenant web application. We are using Express as the web framework in this example, although Nile and Drizzle can be used from any web framework.
-
-To keep the example simple, we’ll implement the webapp in a single file - `src/app.ts`. We’ll start by initializing the webapp:
+Create `src/app.ts` to initialize the Express application. The following snippets add middleware and routes to this same file:
 
 ```typescript
 import express from "express";
-import { tenantDB, tenantContext, db } from "./db/db";
+import { tenantDB, tenantContext } from "./db/db";
 import {
   tenants as tenantSchema,
   todos as todoSchema,
@@ -225,7 +199,7 @@ app.use(express.json());
 
 #### Initialize the tenant-aware middleware
 
-Next, we’ll add middleware to the example. This middleware grabs the tenant ID from the path parameters and stores it in the `AsyncLocalStorage`. The `tenantDB` wrapper that we created in `src/db/index.ts` uses this tenant ID to set `nile.tenant_id` when executing queries, which then guarantees that the queries will execute against this tenant’s virtual database.
+Next, we’ll add middleware to the example. This middleware grabs the tenant ID from the path parameters and stores it in the `AsyncLocalStorage`. The `tenantDB` wrapper that we created in `src/db/db.ts` uses this tenant ID to set `nile.tenant_id` when executing queries, which then guarantees that the queries will execute against this tenant’s virtual database.
 
 ```typescript
 // set the tenant ID in the context based on the URL parameter
@@ -236,19 +210,18 @@ app.use('/api/tenants/:tenantId/*', (req, res, next) => {
 });
 ```
 
-The example gets the tenant ID from path parameter, but it is also common to set the tenant ID in a header such as `x-tenant-id` or in a cookie.
+This example reads the tenant ID from the URL. Before using it in production, authenticate the caller and verify their membership in that tenant. A tenant ID supplied by the caller does not authorize access.
 
 #### Add routes
 
-Lastly, we need to add some routes for creating and listing tenants and todos. Note how we are using `tenantDB` wrapper to connect to the tenant’s virtual database. Also note how in `app.get("/api/tenants/:tenantId/todos"` we did not need to specify `where tenant_id=...` in the query. This is exactly because we are routed to that tenant’s database and the query cannot return data for any other tenant.
+Add routes for creating and listing tenants, and for creating, updating and listing their todos. Each query runs inside `tenantDB`. For the todo routes, the middleware supplies the tenant context, so the list query does not need a `where tenant_id = ...` filter. The update query still filters by todo ID to select the row to change.
 
 ```typescript
 // create new tenant
 app.post("/api/tenants", async (req, res) => {
   try {
     const name = req.body.name;
-    var tenants: any = null;
-    tenants = await tenantDB(async (tx) => {
+    const tenants = await tenantDB(async (tx) => {
         return await tx.insert(tenantSchema).values({ name }).returning();
     });
     res.json(tenants);
@@ -278,6 +251,7 @@ app.post("/api/tenants/:tenantId/todos", async (req, res) => {
     const { title, complete } = req.body;
     if (!title) {
       res.status(400).json({message: "No task title provided",});
+      return;
     }
     const tenantId = req.params.tenantId;
 
@@ -287,7 +261,6 @@ app.post("/api/tenants/:tenantId/todos", async (req, res) => {
         .values({ tenantId, title, complete })
         .returning();
     });
-    // return without the embedding vector, since it is huge and useless
     res.json(newTodo);
   } catch (error: any) {
     console.log("error adding task: " + error.message);
@@ -296,7 +269,7 @@ app.post("/api/tenants/:tenantId/todos", async (req, res) => {
 });
 
 // update tasks for tenant
-// No need for where clause because we have the tenant in the context
+// The tenant context scopes the query, and the todo ID selects the row to update.
 app.put("/api/tenants/:tenantId/todos", async (req, res) => {
   try {
     const { id, complete } = req.body;
@@ -367,7 +340,7 @@ curl  -X GET \
 
 ## Project file structure
 
-This is the file structure of the project. In the `src/db` directory, we have database-related files including connection in `db.ts` and schema definitions in `schema.ts`. The files generated by the migrations and introspections are in `./drizzle`
+This is the file structure of the project. In the `src/db` directory, we have database-related files including connection in `db.ts` and schema definitions in `schema.ts`. The files generated by the migrations and introspections are in `./drizzle`. The following timestamps and migration names are illustrative. Yours will differ.
 
 ```plaintext
 📦 <project root>
@@ -377,12 +350,14 @@ This is the file structure of the project. In the `src/db` directory, we have da
  │   │  └ 📜 schema.ts
  │   └ 📜 app.ts
  ├ 📂 drizzle
- │   ├ 📂 meta
- │   │  ├ 📜 _journal.json
- │   │  └ 📜 0000_snapshot.json
+ │   ├ 📂 20261117000000_baseline
+ │   │  ├ 📜 migration.sql
+ │   │  └ 📜 snapshot.json
+ │   ├ 📂 20261117000100_add_todos
+ │   │  ├ 📜 migration.sql
+ │   │  └ 📜 snapshot.json
  │   ├ 📜 relations.ts
- │   ├ 📜 schema.ts
- │   └ 📜 0000_watery_spencer_smythe.sql
+ │   └ 📜 schema.ts
  ├ 📜 .env
  ├ 📜 drizzle.config.ts
  └ 📜 package.json

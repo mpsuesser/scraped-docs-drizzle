@@ -2,23 +2,24 @@
 url: https://orm.drizzle.team/docs/cockroach/tutorials/drizzle-with-vercel-edge-functions
 title: "Drizzle With Vercel Edge Functions"
 description: ""
-access_date: 2026-11-17T09:48:18.024Z
-current_date: 2026-11-17T09:48:18.024Z
+access_date: 2026-11-18T08:29:58.297Z
+current_date: 2026-11-18T08:29:58.297Z
 ---
 
 ## Drizzle with Vercel Edge Functions
 
-This tutorial demonstrates how to use Drizzle ORM with [Vercel Functions](https://vercel.com/docs/functions) in [Edge runtime](https://vercel.com/docs/functions/runtimes/edge-runtime).
+This tutorial uses the Drizzle ORM and Drizzle Kit v1 release candidate with [Vercel Functions](https://vercel.com/docs/functions) in [Edge runtime](https://vercel.com/docs/functions/runtimes/edge-runtime).
 
 This guide assumes familiarity with:
 
+- Use Node.js 22 or later for the Neon serverless driver and local tooling.
 - You should have the latest version of [Vercel CLI](https://vercel.com/docs/cli#) installed.
 
 ```shell
 npm i -g vercel
 ```
 
-- You should have an existing Next.js project or create a new one using the following command:
+- Use a Next.js project with the App Router, a `src` directory and the `@/*` import alias pointing to `src/*`. To create one, run the following command and select those options. Run the remaining commands from the project directory:
 ```bash
 npx create-next-app@latest --typescript
 ```
@@ -29,12 +30,6 @@ npm i drizzle-orm@rc
 npm i -D drizzle-kit@rc
 ```
 
-IMPORTANT
-
-In case you face the issue with resolving dependencies during installation:
-
-If you’re not using React Native, forcing the installation with `--force` or `--legacy-peer-deps` should resolve the issue. If you are using React Native, then you need to use the exact version of React which is compatible with your React Native version.
-
 ## Edge-compatible driver
 
 When using Drizzle ORM with Vercel Edge functions you have to use edge-compatible drivers because the functions run in [Edge runtime](https://vercel.com/docs/functions/runtimes/edge-runtime) not in Node.js runtime, so there are some limitations of standard Node.js APIs.
@@ -42,7 +37,7 @@ When using Drizzle ORM with Vercel Edge functions you have to use edge-compatibl
 You can choose one of these drivers according to your database dialect:
 
 - [Neon serverless driver](../../get-started-postgresql.md#neon) allows you to query your Neon Postgres databases from serverless and edge environments over HTTP or WebSockets in place of TCP. We recommend using this driver for connecting to `Neon Postgres`.
-- [Vercel Postgres driver](../../get-started-postgresql.md#vercel-postgres) is built on top of the `Neon serverless driver`. We recommend using this driver for connecting to `Vercel Postgres`.
+- For Postgres provisioned through Vercel Marketplace, use the driver for the selected provider. The [Neon integration](https://vercel.com/marketplace/neon) uses the Neon serverless driver shown below.
 - [PlanetScale serverless driver](../../mysql/get-started-mysql.md#planetscale) allows you access any `MySQL` client and execute queries over an HTTP connection, which is generally not blocked by cloud providers.
 - [libSQL client](../../sqlite/get-started-sqlite.md#turso) allows you to access [Turso](https://docs.turso.tech/introduction) database.
 - Navigate directly to the [Neon Postgres](../../tutorials/drizzle-with-vercel-edge-functions.md#neon-postgres) section.
@@ -58,6 +53,7 @@ Install the `@neondatabase/serverless` driver:
 
 ```shell
 npm i @neondatabase/serverless
+npm i dotenv
 ```
 
 #### Create a table
@@ -82,21 +78,24 @@ export const usersTable = pgTable('users_table', {
 Create a `drizzle.config.ts` file in the root of your project and add the following content:
 
 ```typescript
+import { config } from 'dotenv';
 import { defineConfig } from "drizzle-kit";
+
+config({ path: '.env.local' });
 
 export default defineConfig({
   schema: "./src/db/schema.ts",
   dialect: "postgresql",
   dbCredentials: {
-    url: process.env.POSTGRES_URL!,
+    url: process.env.DATABASE_URL!,
   },
 });
 ```
 
-Configure your database connection string in the `.env` file:
+Configure your database connection string in the `.env.local` file:
 
 ```plaintext
-POSTGRES_URL="postgres://[user]:[password]@[host]-[region].aws.neon.tech:5432/[db-name]?sslmode=[ssl-mode]"
+DATABASE_URL="postgres://[user]:[password]@[host]-[region].aws.neon.tech:5432/[db-name]?sslmode=[ssl-mode]"
 ```
 
 #### Applying changes to the database
@@ -143,9 +142,11 @@ Push command is good for situations where you need to quickly test new schema de
 Create a `index.ts` file in the `src/db` directory and set up your database configuration:
 
 ```typescript
-import { drizzle } from 'drizzle-orm/neon-serverless';
+import { drizzle } from 'drizzle-orm/neon-http';
+import { neon } from '@neondatabase/serverless';
 
-export const db = drizzle(process.env.POSTGRES_URL!)
+const sql = neon(process.env.DATABASE_URL!);
+export const db = drizzle({ client: sql });
 ```
 
 #### Create an API route
@@ -157,10 +158,10 @@ import { db } from "@/db";
 import { usersTable } from "@/db/schema";
 import { NextResponse } from "next/server";
 
-export const dynamic = 'force-dynamic'; // static by default, unless reading the request
+export const dynamic = 'force-dynamic';
 export const runtime = 'edge' // specify the runtime to be edge
 
-export async function GET(request: Request) {
+export async function GET() {
   const users = await db.select().from(usersTable)
 
   return NextResponse.json({ users, message: 'success' });
@@ -192,10 +193,10 @@ Create a new project in the [dashboard](https://vercel.com/new) or run the `verc
 vercel
 ```
 
-Add `POSTGRES_URL` environment variable:
+Add `DATABASE_URL` environment variable:
 
 ```bash
-vercel env add POSTGRES_URL
+vercel env add DATABASE_URL
 ```
 
 Redeploy your project to update your environment variables:
@@ -208,161 +209,9 @@ Finally, you can use URL of the deployed project and navigate to the route you c
 
 ### Vercel Postgres
 
-You can check quickstart guide for Drizzle with Vercel Postgres client in the [documentation](../../get-started-postgresql.md#vercel-postgres).
+[Vercel Postgres is no longer available](https://vercel.com/docs/postgres). For a new database, this tutorial uses Neon as the Marketplace provider. Connect [Neon through Vercel Marketplace](https://vercel.com/marketplace/neon) to your project, then follow the [Neon Postgres steps above](#neon-postgres). Use the integration’s `DATABASE_URL` for both Drizzle Kit and your application. If you configured a variable prefix, use that name instead.
 
-#### Install the @vercel/postgres driver
-
-Install the `@vercel/postgres` driver:
-
-```shell
-npm i @vercel/postgres
-```
-
-#### Create a table
-
-Create a `schema.ts` file in the `src/db` directory and declare a table schema:
-
-```typescript
-import { pgTable, serial, text } from "drizzle-orm/pg-core";
-
-export const usersTable = pgTable('users_table', {
-  id: serial('id').primaryKey(),
-  name: text('name').notNull(),
-  age: text('age').notNull(),
-  email: text('email').notNull().unique(),
-})
-```
-
-#### Setup Drizzle config file
-
-**Drizzle config** - a configuration file that is used by [Drizzle Kit](../../kit-overview.md) and contains all the information about your database connection, migration folder and schema files.
-
-Create a `drizzle.config.ts` file in the root of your project and add the following content:
-
-```typescript
-import { defineConfig } from "drizzle-kit";
-
-export default defineConfig({
-  schema: "./src/db/schema.ts",
-  dialect: "postgresql",
-  dbCredentials: {
-    url: process.env.POSTGRES_URL!,
-  },
-});
-```
-
-Configure your database connection string in the `.env` file:
-
-```plaintext
-POSTGRES_URL="postgres://[user]:[password]@[host]-[region].aws.neon.tech:5432/[db-name]?sslmode=[ssl-mode]"
-```
-
-#### Applying changes to the database
-
-You can generate migrations using `drizzle-kit generate` command and then run them using the `drizzle-kit migrate` command.
-
-Generate migrations:
-
-```bash
-npx drizzle-kit generate
-```
-
-These migrations are stored in the `drizzle` directory by default. Each migration has its own timestamped folder containing a `migration.sql` file and a `snapshot.json` file.
-
-Example of a generated migration:
-
-```sql
-CREATE TABLE "users_table" (
-    "id" serial PRIMARY KEY,
-    "name" text NOT NULL,
-    "age" text NOT NULL,
-    "email" text NOT NULL UNIQUE
-);
-```
-
-Run migrations:
-
-```bash
-npx drizzle-kit migrate
-```
-
-Alternatively, you can push changes directly to the database using [Drizzle kit push command](../../kit-overview.md#prototyping-with-db-push):
-
-```bash
-npx drizzle-kit push
-```
-
-IMPORTANT
-
-Push command is good for situations where you need to quickly test new schema designs or changes in a local development environment, allowing for fast iterations without the overhead of managing migration files.
-
-#### Connect Drizzle ORM to your database
-
-Create a `index.ts` file in the `src/db` directory and set up your database configuration:
-
-```typescript
-import { drizzle } from 'drizzle-orm/vercel-postgres';
-
-export const db = drizzle()
-```
-
-#### Create an API route
-
-Create `route.ts` in `src/app/api/hello` directory. To learn more about how to write a function, see the [Functions API Reference](https://vercel.com/docs/functions/functions-api-reference) and [Vercel Functions Quickstart](https://vercel.com/docs/functions/quickstart).
-
-```ts
-import { db } from "@/db";
-import { usersTable } from "@/db/schema";
-import { NextResponse } from "next/server";
-
-export const dynamic = 'force-dynamic'; // static by default, unless reading the request
-export const runtime = 'edge' // specify the runtime to be edge
-
-export async function GET(request: Request) {
-  const users = await db.select().from(usersTable)
-
-  return NextResponse.json({ users, message: 'success' });
-}
-```
-
-#### Test your code locally
-
-Run the `next dev` command to start your local development server:
-
-```bash
-npx next dev
-```
-
-Navigate to the route you created `(e.g. /api/hello)` in your browser:
-
-```plaintext
-{
-  "users": [],
-  "message": "success"
-}
-```
-
-#### Deploy your project
-
-Create a new project in the [dashboard](https://vercel.com/new) or run the `vercel` command to deploy your project:
-
-```bash
-vercel
-```
-
-Add `POSTGRES_URL` environment variable:
-
-```bash
-vercel env add POSTGRES_URL
-```
-
-Redeploy your project to update your environment variables:
-
-```bash
-vercel
-```
-
-Finally, you can use URL of the deployed project and navigate to the route you created `(e.g. /api/hello)` to access your edge function.
+The [Postgres on Vercel tutorial](../../tutorials/drizzle-with-vercel.md) covers Marketplace setup and pulling the environment variables locally.
 
 ### PlanetScale
 

@@ -2,16 +2,19 @@
 url: https://orm.drizzle.team/docs/singlestore/tutorials/drizzle-with-vercel
 title: "Drizzle With Vercel"
 description: ""
-access_date: 2026-08-03T19:43:09.006Z
-current_date: 2026-08-03T19:43:09.006Z
+access_date: 2026-11-18T08:29:58.297Z
+current_date: 2026-11-18T08:29:58.297Z
 ---
 
-## Drizzle with Vercel Postgres
+## Drizzle with Postgres on Vercel
 
-This tutorial demonstrates how to use Drizzle ORM with [Vercel Postgres](https://vercel.com/docs/storage/vercel-postgres). Vercel Postgres is a serverless SQL database designed to integrate with Vercel Functions and your frontend framework.
+This tutorial uses the Drizzle ORM and Drizzle Kit v1 release candidate to set up a new project with Postgres on Vercel. For this example, we use a Neon database connected through [Vercel Marketplace](https://vercel.com/marketplace/neon).
+
+[Vercel Postgres is no longer available](https://vercel.com/docs/postgres). New projects use a Postgres provider from Marketplace. Other providers have their own connection setup.
 
 This guide assumes familiarity with:
 
+- Use Node.js 22 or later for the Neon serverless driver.
 - You should have installed Drizzle ORM and [Drizzle kit](../../kit-overview.md). You can do this by running the following command:
 
 ```shell
@@ -25,30 +28,31 @@ npm i -D drizzle-kit@rc
 npm i dotenv
 ```
 
-- You should have installed `@vercel/postgres` package. Read more about this package [here](https://www.npmjs.com/package/@vercel/postgres)
+- You should have installed `@neondatabase/serverless` package. Read more about this package [here](https://www.npmjs.com/package/@neondatabase/serverless)
 
 ```shell
-npm i @vercel/postgres
+npm i @neondatabase/serverless
 ```
 
-Check [Vercel documentation](https://vercel.com/docs/storage/vercel-postgres/using-an-orm#drizzle) to learn how to connect to the database with Drizzle ORM.
+## Setup Neon on Vercel and Drizzle ORM
 
-## Setup Vercel Postgres and Drizzle ORM
+#### Create and connect a Neon database
 
-#### Create a new Vercel Postgres database
+Add [Neon from Vercel Marketplace](https://vercel.com/marketplace/neon) to your Vercel project. Follow the integration’s setup to create a database and connect it to the project.
 
-You can create new Vercel Postgres database in the [dashboard](https://vercel.com/dashboard).
+#### Setup the connection string
 
-Read Vercel Postgres [documentation](https://vercel.com/docs/storage/vercel-postgres/quickstart) to learn how to create a new database.
+The integration adds database environment variables to the connected project. Link your local directory and download the development variables:
 
-#### Setup connection string variable
+```bash
+npx vercel link
+npx vercel env pull .env.local
+```
 
-Navigate to your Vercel Postgres database and copy `POSTGRES_URL` from `.env.local` section.
-
-Add `POSTGRES_URL` to your `.env.local` or `.env` file.
+Confirm that `.env.local` contains `DATABASE_URL`. If you configured a prefix for the integration, use the corresponding variable name throughout this tutorial. Keep this file out of version control.
 
 ```plaintext
-POSTGRES_URL=<YOUR_DATABASE_URL>
+DATABASE_URL=<YOUR_NEON_DATABASE_URL>
 ```
 
 #### Connect Drizzle ORM to your database
@@ -56,12 +60,14 @@ POSTGRES_URL=<YOUR_DATABASE_URL>
 Create a `index.ts` file in the `src/db` directory and set up your database configuration:
 
 ```typescript
-import { drizzle } from 'drizzle-orm/vercel-postgres';
+import { drizzle } from 'drizzle-orm/neon-http';
+import { neon } from '@neondatabase/serverless';
 import { config } from 'dotenv';
 
-config({ path: '.env.local' }); // or .env
+config({ path: '.env.local' });
 
-export const db = drizzle();
+const sql = neon(process.env.DATABASE_URL!);
+export const db = drizzle({ client: sql });
 ```
 
 #### Create tables
@@ -115,7 +121,7 @@ export default defineConfig({
   out: './migrations',
   dialect: 'postgresql',
   dbCredentials: {
-    url: process.env.POSTGRES_URL!,
+    url: process.env.DATABASE_URL!,
   },
 });
 ```
@@ -130,13 +136,13 @@ Generate migrations:
 npx drizzle-kit generate
 ```
 
-These migrations are stored in the `drizzle/migrations` directory, as specified in your `drizzle.config.ts`. This directory will contain the SQL files necessary to update your database schema and a `meta` folder for storing snapshots of the schema at different migration stages.
+These migrations are stored in the `migrations` directory, as specified in your `drizzle.config.ts`. Each migration has its own timestamped folder containing `migration.sql` and `snapshot.json`.
 
 Example of a generated migration:
 
 ```sql
-CREATE TABLE IF NOT EXISTS "posts_table" (
-    "id" serial PRIMARY KEY NOT NULL,
+CREATE TABLE "posts_table" (
+    "id" serial PRIMARY KEY,
     "title" text NOT NULL,
     "content" text NOT NULL,
     "user_id" integer NOT NULL,
@@ -144,19 +150,14 @@ CREATE TABLE IF NOT EXISTS "posts_table" (
     "updated_at" timestamp NOT NULL
 );
 --> statement-breakpoint
-CREATE TABLE IF NOT EXISTS "users_table" (
-    "id" serial PRIMARY KEY NOT NULL,
+CREATE TABLE "users_table" (
+    "id" serial PRIMARY KEY,
     "name" text NOT NULL,
     "age" integer NOT NULL,
-    "email" text NOT NULL,
-    CONSTRAINT "users_table_email_unique" UNIQUE("email")
+    "email" text NOT NULL UNIQUE
 );
 --> statement-breakpoint
-DO $$ BEGIN
- ALTER TABLE "posts_table" ADD CONSTRAINT "posts_table_user_id_users_table_id_fk" FOREIGN KEY ("user_id") REFERENCES "users_table"("id") ON DELETE cascade ON UPDATE no action;
-EXCEPTION
- WHEN duplicate_object THEN null;
-END $$;
+ALTER TABLE "posts_table" ADD CONSTRAINT "posts_table_user_id_users_table_id_fkey" FOREIGN KEY ("user_id") REFERENCES "users_table"("id") ON DELETE CASCADE;
 ```
 
 Run migrations:
@@ -177,7 +178,7 @@ Push command is good for situations where you need to quickly test new schema de
 
 ## Basic file structure
 
-This is the basic file structure of the project. In the `src/db` directory, we have database-related files including connection in `index.ts` and schema definitions in `schema.ts`.
+The `src/db` directory contains the connection in `index.ts` and table definitions in `schema.ts`. Drizzle Kit writes migrations to `migrations`. Your generated migration timestamp and name will differ from this example.
 
 ```plaintext
 📦 <project root>
@@ -186,10 +187,9 @@ This is the basic file structure of the project. In the `src/db` directory, we h
  │   │  ├ 📜 index.ts
  │   │  └ 📜 schema.ts
  ├ 📂 migrations
- │   ├ 📂 meta
- │   │  ├ 📜 _journal.json
- │   │  └ 📜 0000_snapshot.json
- │   └ 📜 0000_watery_spencer_smythe.sql
+ │   └ 📂 20261117000000_initial
+ │      ├ 📜 migration.sql
+ │      └ 📜 snapshot.json
  ├ 📜 .env.local
  ├ 📜 drizzle.config.ts
  ├ 📜 package.json
@@ -221,11 +221,7 @@ export async function createPost(data: InsertPost) {
 
 Read more about select query in the [documentation](../../select.md).
 
-IMPORTANT
-
-`getColumns` available starting from `drizzle-orm@1.0.0-beta.2` (read more [here](../../upgrade-v1.md))
-
-If you are on pre-1 version(like `0.45.1`) then use `getTableColumns`
+Use `getColumns(usersTable)` to include all user columns alongside the computed post count in the second query below.
 
 ```typescript
 import { asc, between, count, eq, getColumns, sql } from 'drizzle-orm';
