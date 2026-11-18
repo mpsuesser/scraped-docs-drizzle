@@ -2,15 +2,16 @@
 url: https://orm.drizzle.team/docs/sqlite/tutorials/drizzle-with-encore
 title: "Drizzle With Encore"
 description: ""
-access_date: 2026-08-03T19:43:09.006Z
-current_date: 2026-08-03T19:43:09.006Z
+access_date: 2026-11-18T08:22:15.197Z
+current_date: 2026-11-18T08:22:15.197Z
 ---
 
 ## Drizzle with Encore
 
-This tutorial demonstrates how to use **Drizzle ORM** with **Encore**, an open source backend framework with built-in infrastructure automation and observability.
+Build a PostgreSQL API with the Drizzle ORM and Drizzle Kit v1 release candidate. Encore provisions the database and applies your migrations when the application starts.
 
-- You should have the Encore CLI installed. You can install it with:
+- You need [Docker](https://docs.docker.com/get-started/get-docker/) running for the local PostgreSQL database.
+- You should have the Encore CLI installed. This tutorial uses Encore 1.58.9, which supports Drizzle v1 migration folders with `source: "drizzle/v1"`. You can install it with:
 ```bash
 # macOS
 brew install encoredev/tap/encore
@@ -21,29 +22,25 @@ curl -L https://encore.dev/install.sh | bash
 # Windows
 iwr https://encore.dev/install.ps1 | iex
 ```
-- You should have installed Drizzle ORM and [Drizzle kit](../../kit-overview.md). You can do this by running the following command:
-
-```shell
-npm i drizzle-orm@rc
-npm i -D drizzle-kit@rc
-```
 
 ## Setup Encore and Drizzle ORM
 
 #### Create a new Encore project
 
-You can create a new Encore project with Drizzle already configured:
+Create an empty Encore TypeScript project:
 
 ```bash
-encore app create my-app --example=ts/drizzle
+encore app create my-app --example=ts/empty
 cd my-app
 ```
 
-Or if you have an existing Encore project, install Drizzle:
+Install Drizzle ORM, Drizzle Kit and the PostgreSQL driver:
 
 ```shell
 npm i drizzle-orm@rc
+npm i pg
 npm i -D drizzle-kit@rc
+npm i -D @types/pg
 ```
 
 #### Create the database
@@ -53,19 +50,18 @@ Define your database in a `database.ts` file. Encore automatically provisions a 
 ```typescript
 import { SQLDatabase } from "encore.dev/storage/sqldb";
 import { drizzle } from "drizzle-orm/node-postgres";
-import * as schema from "./schema";
 
 const db = new SQLDatabase("mydb", {
   migrations: {
     path: "migrations",
-    source: "drizzle",
+    source: "drizzle/v1",
   },
 });
 
-export const orm = drizzle(db.connectionString, { schema });
+export const orm = drizzle(db.connectionString);
 ```
 
-Setting `source: "drizzle"` tells Encore to use Drizzle’s migration format.
+Setting `source: "drizzle/v1"` tells Encore to read each timestamped migration folder and its `migration.sql`. This example uses SQL queries, so the Drizzle client does not need a schema option.
 
 #### Define your schema
 
@@ -101,10 +97,19 @@ export default defineConfig({
 Run Drizzle Kit to generate migrations from your schema:
 
 ```bash
-drizzle-kit generate
+npx drizzle-kit generate
 ```
 
-This creates migration files in the `migrations` folder.
+This creates a timestamped folder under `migrations`, containing `migration.sql` and `snapshot.json`:
+
+```text
+migrations/
+└── 20261117000000_initial/
+    ├── migration.sql
+    └── snapshot.json
+```
+
+The timestamp and generated name will differ. Keep both files. Encore applies the SQL, and Drizzle Kit uses the snapshot to generate subsequent changes.
 
 #### Create an API endpoint
 
@@ -114,7 +119,6 @@ Use Drizzle in your Encore endpoints:
 import { api } from "encore.dev/api";
 import { orm } from "./database";
 import { users } from "./schema";
-import { eq } from "drizzle-orm";
 
 interface User {
   id: number;
@@ -150,9 +154,7 @@ Start your Encore app:
 encore run
 ```
 
-Encore automatically applies migrations when starting. Open [localhost:9400](http://localhost:9400/) to see the local dashboard with API docs, database explorer, and tracing.
-
-Migrations are automatically applied when you run your Encore application. You don’t need to run `drizzle-kit migrate` manually.
+Encore applies migrations when starting, so you do not need to run `drizzle-kit migrate` separately. After generating another migration while the app is running, restart `encore run` to apply it. Open [localhost:9400](http://localhost:9400/) to see the local dashboard with API docs, database explorer, and tracing.
 
 ## Learn more
 
