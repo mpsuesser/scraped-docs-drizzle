@@ -2,8 +2,8 @@
 url: https://orm.drizzle.team/docs/get-started/mssql-existing
 title: "Mssql Existing"
 description: ""
-access_date: 2026-08-03T19:43:09.006Z
-current_date: 2026-08-03T19:43:09.006Z
+access_date: 2026-11-19T10:11:18.636Z
+current_date: 2026-11-19T10:11:18.636Z
 ---
 
 ## Get Started with Drizzle and MSSQL in existing project
@@ -74,7 +74,7 @@ For example, you have such table in your database:
 
 ```sql
 CREATE TABLE [users] (
- [id] int,
+ [id] int IDENTITY(1,1) NOT NULL,
  [name] varchar(255) NOT NULL,
  [age] int NOT NULL,
  [email] varchar(255) NOT NULL,
@@ -98,7 +98,7 @@ Here is an example of the generated `schema.ts` file:
 import { mssqlTable, int, varchar, unique, primaryKey } from "drizzle-orm/mssql-core"
 
 export const users = mssqlTable("users", {
- id: int(),
+ id: int().identity(),
  name: varchar({ length: 255 }).notNull(),
  age: int().notNull(),
  email: varchar({ length: 255 }).notNull(),
@@ -146,7 +146,7 @@ Let’s **update** the `src/index.ts` file with queries to create, read, update,
 import 'dotenv/config';
 import { drizzle } from 'drizzle-orm/node-mssql';
 import { eq } from 'drizzle-orm';
-import { usersTable } from './db/schema';
+import { users as usersTable } from './db/schema';
   
 const db = drizzle(process.env.DATABASE_URL!);
 
@@ -210,13 +210,13 @@ If you don’t have bun installed, check the [Bun installation docs](https://bun
 
 #### Step 9 - Update your table schema (optional)
 
-If you want to update your table schema, you can do it in the `schema.ts` file. For example, let’s add a new column `phone` to the `users_table`:
+Add a `phone` column to the `users` table in `src/db/schema.ts`.
 
 ```typescript
 import { mssqlTable, int, varchar, unique, primaryKey } from "drizzle-orm/mssql-core"
 
 export const users = mssqlTable("users", {
- id: int(),
+ id: int().identity(),
  name: varchar({ length: 255 }).notNull(),
  age: int().notNull(),
  email: varchar({ length: 255 }).notNull(),
@@ -261,7 +261,7 @@ Read more about migration process in [documentation](../mssql/kit-overview.md).
 import 'dotenv/config';
 import { drizzle } from 'drizzle-orm/node-mssql';
 import { eq } from 'drizzle-orm';
-import { usersTable } from './db/schema';
+import { users as usersTable } from './db/schema';
 
 const db = drizzle(process.env.DATABASE_URL!);
 

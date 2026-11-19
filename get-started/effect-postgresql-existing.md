@@ -2,8 +2,8 @@
 url: https://orm.drizzle.team/docs/get-started/effect-postgresql-existing
 title: "Effect Postgresql Existing"
 description: ""
-access_date: 2026-08-03T19:43:09.006Z
-current_date: 2026-08-03T19:43:09.006Z
+access_date: 2026-11-19T10:11:18.636Z
+current_date: 2026-11-19T10:11:18.636Z
 ---
 
 ## Get Started with Drizzle and Effect PostgreSQL in existing project
@@ -145,20 +145,9 @@ import * as PgDrizzle from 'drizzle-orm/effect-postgres';
 import { PgClient } from '@effect/sql-pg';
 import * as Effect from 'effect/Effect';
 import * as Redacted from 'effect/Redacted';
-import { types } from 'pg';
 
-// Configure the PgClient layer with type parsers
 const PgClientLive = PgClient.layer({
   url: Redacted.make(process.env.DATABASE_URL!),
-  types: {
-    getTypeParser: (typeId, format) => {
-      // Return raw values for date/time types to let Drizzle handle parsing
-      if ([1184, 1114, 1082, 1186, 1231, 1115, 1185, 1187, 1182].includes(typeId)) {
-        return (val: any) => val;
-      }
-      return types.getTypeParser(typeId, format);
-    },
-  },
 });
 
 const program = Effect.gen(function*() {
@@ -180,20 +169,11 @@ import * as PgDrizzle from 'drizzle-orm/effect-postgres';
 import { PgClient } from '@effect/sql-pg';
 import * as Effect from 'effect/Effect';
 import * as Redacted from 'effect/Redacted';
-import { types } from 'pg';
 import { eq } from 'drizzle-orm';
-import { usersTable } from './db/schema';
+import { users as usersTable } from './db/schema';
 
 const PgClientLive = PgClient.layer({
   url: Redacted.make(process.env.DATABASE_URL!),
-  types: {
-    getTypeParser: (typeId, format) => {
-      if ([1184, 1114, 1082, 1186, 1231, 1115, 1185, 1187, 1182].includes(typeId)) {
-        return (val: any) => val;
-      }
-      return types.getTypeParser(typeId, format);
-    },
-  },
 });
 
 const program = Effect.gen(function*() {
@@ -311,20 +291,11 @@ import * as PgDrizzle from 'drizzle-orm/effect-postgres';
 import { PgClient } from '@effect/sql-pg';
 import * as Effect from 'effect/Effect';
 import * as Redacted from 'effect/Redacted';
-import { types } from 'pg';
 import { eq } from 'drizzle-orm';
-import { usersTable } from './db/schema';
+import { users as usersTable } from './db/schema';
 
 const PgClientLive = PgClient.layer({
   url: Redacted.make(process.env.DATABASE_URL!),
-  types: {
-    getTypeParser: (typeId, format) => {
-      if ([1184, 1114, 1082, 1186, 1231, 1115, 1185, 1187, 1182].includes(typeId)) {
-        return (val: any) => val;
-      }
-      return types.getTypeParser(typeId, format);
-    },
-  },
 });
 
 const program = Effect.gen(function*() {

@@ -2,8 +2,8 @@
 url: https://orm.drizzle.team/docs/get-started/pglite-existing
 title: "Pglite Existing"
 description: ""
-access_date: 2026-08-03T19:43:09.006Z
-current_date: 2026-08-03T19:43:09.006Z
+access_date: 2026-11-19T10:11:18.636Z
+current_date: 2026-11-19T10:11:18.636Z
 ---
 
 ## Get Started with Drizzle and PGLite in existing project
@@ -41,17 +41,15 @@ npm i -D drizzle-kit@rc tsx
 
 #### Step 2 - Setup connection variables
 
-Create a `.env` file in the root of your project and add your database connection variable:
+Set `DATABASE_URL` in `.env` to your database directory, relative to the project root.
 
-```plaintext
-DATABASE_URL=
+```dotenv
+DATABASE_URL=./database
 ```
 
 #### Step 3 - Setup Drizzle config file
 
-**Drizzle config** - a configuration file that is used by [Drizzle Kit](../kit-overview.md) and contains all the information about your database connection, migration folder and schema files.
-
-Create a `drizzle.config.ts` file in the root of your project and add the following content:
+Create `drizzle.config.ts` at the project root.
 
 ```typescript
 import 'dotenv/config';
@@ -61,6 +59,7 @@ export default defineConfig({
   out: './drizzle',
   schema: './src/db/schema.ts',
   dialect: 'postgresql',
+  driver: 'pglite',
   dbCredentials: {
     url: process.env.DATABASE_URL!,
   },
@@ -157,7 +156,7 @@ Let’s **update** the `src/index.ts` file with queries to create, read, update,
 import 'dotenv/config';
 import { drizzle } from 'drizzle-orm/pglite';
 import { eq } from 'drizzle-orm';
-import { usersTable } from './db/schema';
+import { users as usersTable } from './db/schema';
   
 const db = drizzle(process.env.DATABASE_URL!);
 
@@ -272,7 +271,7 @@ Read more about migration process in [documentation](../kit-overview.md).
 import 'dotenv/config';
 import { drizzle } from 'drizzle-orm/pglite';
 import { eq } from 'drizzle-orm';
-import { usersTable } from './db/schema';
+import { users as usersTable } from './db/schema';
 
 const db = drizzle(process.env.DATABASE_URL!);
 

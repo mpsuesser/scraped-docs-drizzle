@@ -2,8 +2,8 @@
 url: https://orm.drizzle.team/docs/get-started/nile-existing
 title: "Nile Existing"
 description: ""
-access_date: 2026-08-03T19:43:09.006Z
-current_date: 2026-08-03T19:43:09.006Z
+access_date: 2026-11-19T10:11:18.636Z
+current_date: 2026-11-19T10:11:18.636Z
 ---
 
 ## Get Started with Drizzle and Nile in existing project
@@ -164,7 +164,7 @@ Let’s **update** the `src/index.ts` file with queries to create, read, update,
 import 'dotenv/config';
 import { drizzle } from 'drizzle-orm/node-postgres';
 import { eq, sql } from 'drizzle-orm';
-import { tenantsTable, todosTable } from './db/schema';
+import { tenants as tenantsTable, todos as todosTable } from './db/schema';
   
 const db = drizzle(process.env.NILEDB_URL!);
 
@@ -173,24 +173,26 @@ async function main() {
     name: 'AwesomeSauce Inc.',
   };
 
-  await db.insert(tenantsTable).values(tenant);
+  const [createdTenant] = await db.insert(tenantsTable).values(tenant).returning({ id: tenantsTable.id });
+  if (!createdTenant) throw new Error('Could not create tenant');
   console.log('New tenant created!')
 
   const tenants = await db.select().from(tenantsTable);
   console.log('Getting all tenants from the database: ', tenants)
 
   const todo: typeof todosTable.$inferInsert = {
-    tenantId: tenants[0].id,
+    tenantId: createdTenant.id,
     title: 'Update pitch deck with AI stuff'
   }
 
-  await db.insert(todosTable).values(todo);
+  const [createdTodo] = await db.insert(todosTable).values(todo).returning({ id: todosTable.id });
+  if (!createdTodo?.id) throw new Error('Could not create todo');
   console.log('New todo created!')
 
   const todos = await db.select().from(todosTable);
   console.log('Getting all todos from the database: ', todos)
 
-  await db.execute(sql\`SET nile.tenant_id = '${sql.raw(tenants[0].id)}'\`);
+  await db.execute(sql\`SET nile.tenant_id = '${sql.raw(createdTenant.id)}'\`);
   console.log("Set tenant context");
 
   // note the lack of tenant_id in the query
@@ -202,10 +204,10 @@ async function main() {
     .set({
       complete: true,
     })
-    .where(eq(todosTable.id, todo.id));
+    .where(eq(todosTable.id, createdTodo.id));
   console.log('Todo marked as done!')
 
-  await db.delete(todosTable).where(eq(todosTable.id, todo.id));
+  await db.delete(todosTable).where(eq(todosTable.id, createdTodo.id));
   console.log('Todo deleted!')
 }
 

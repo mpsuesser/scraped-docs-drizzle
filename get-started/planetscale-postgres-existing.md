@@ -2,8 +2,8 @@
 url: https://orm.drizzle.team/docs/get-started/planetscale-postgres-existing
 title: "Planetscale Postgres Existing"
 description: ""
-access_date: 2026-08-03T19:43:09.006Z
-current_date: 2026-08-03T19:43:09.006Z
+access_date: 2026-11-19T10:11:18.636Z
+current_date: 2026-11-19T10:11:18.636Z
 ---
 
 ## Get Started with Drizzle and PlanetScale Postgres in existing project
@@ -167,7 +167,7 @@ Let’s **update** the `src/index.ts` file with queries to create, read, update,
 import 'dotenv/config';
 import { drizzle } from 'drizzle-orm/node-postgres';
 import { eq } from 'drizzle-orm';
-import { usersTable } from './db/schema';
+import { users as usersTable } from './db/schema';
   
 const db = drizzle(process.env.DATABASE_URL!);
 
@@ -282,7 +282,7 @@ Read more about migration process in [documentation](../kit-overview.md).
 import 'dotenv/config';
 import { drizzle } from 'drizzle-orm/node-postgres';
 import { eq } from 'drizzle-orm';
-import { usersTable } from './db/schema';
+import { users as usersTable } from './db/schema';
 
 const db = drizzle(process.env.DATABASE_URL!);
 

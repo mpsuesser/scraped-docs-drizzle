@@ -2,8 +2,8 @@
 url: https://orm.drizzle.team/docs/get-started/vercel-existing
 title: "Vercel Existing"
 description: ""
-access_date: 2026-08-03T19:43:09.006Z
-current_date: 2026-08-03T19:43:09.006Z
+access_date: 2026-11-19T10:11:18.636Z
+current_date: 2026-11-19T10:11:18.636Z
 ---
 
 ## Get Started with Drizzle and Vercel Postgres in existing project
@@ -160,7 +160,7 @@ const db = drizzle({ client: sql })
 import 'dotenv/config';
 import { eq } from 'drizzle-orm';
 import { drizzle } from 'drizzle-orm/vercel-postgres';
-import { usersTable } from './db/schema';
+import { users as usersTable } from './db/schema';
 
 async function main() {
   const db = drizzle();
@@ -275,7 +275,7 @@ Read more about migration process in [documentation](../kit-overview.md).
 import 'dotenv/config';
 import { eq } from 'drizzle-orm';
 import { drizzle } from 'drizzle-orm/vercel-postgres';
-import { usersTable } from './db/schema';
+import { users as usersTable } from './db/schema';
 
 async function main() {
   const db = drizzle();
