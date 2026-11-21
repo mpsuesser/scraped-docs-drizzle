@@ -2,13 +2,23 @@
 url: https://orm.drizzle.team/docs/singlestore/latest-releases
 title: "Latest Releases"
 description: ""
-access_date: 2026-10-31T11:01:52.587Z
-current_date: 2026-10-31T11:01:52.587Z
+access_date: 2026-11-21T11:11:39.779Z
+current_date: 2026-11-21T11:11:39.779Z
 ---
 
-Latest Releases[Drizzle ORM and Drizzle Kit v1.0.0-rc.5 release](../latest-releases/drizzle-orm-v1rc5.md)
+Latest Releases[Drizzle ORM, Drizzle Kit and Drizzle Pulse v1.0.0-rc.6 release](../latest-releases/drizzle-orm-v1rc6.md)
 
 [
+
+Nov 20, 2026
+
+Breaking changes to codecs and migrations, PostgreSQL driver improvements, and updates to Drizzle Pulse.
+
+Read more
+
+](../latest-releases/drizzle-orm-v1rc6.md)[
+
+Drizzle ORM and Drizzle Kit v1.0.0-rc.5 release
 
 Oct 21, 2026
 

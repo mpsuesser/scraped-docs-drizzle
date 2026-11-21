@@ -2,15 +2,15 @@
 url: https://orm.drizzle.team/docs/latest-releases/drizzle-orm-v0321
 title: "Drizzle Orm V0321"
 description: ""
-access_date: 2026-10-31T10:54:20.546Z
-current_date: 2026-10-31T10:54:20.546Z
+access_date: 2026-11-21T11:11:39.779Z
+current_date: 2026-11-21T11:11:39.779Z
 ---
 
 [v1.0](https://orm.drizzle.team/roadmap)
 
 [
 
-99.5%
+99.6%
 
 ](https://orm.drizzle.team/roadmap)
 
