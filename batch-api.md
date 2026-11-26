@@ -2,8 +2,8 @@
 url: https://orm.drizzle.team/docs/batch-api
 title: "Batch Api"
 description: ""
-access_date: 2026-11-21T11:11:39.779Z
-current_date: 2026-11-21T11:11:39.779Z
+access_date: 2026-11-26T10:39:33.329Z
+current_date: 2026-11-26T10:39:33.329Z
 ---
 
 ## Batch API
@@ -149,6 +149,38 @@ Unmatched keys are skipped. `bulkUpdate` sends values as arrays and turns them i
 Both bulk methods split the input into chunks and run them in one transaction by default. Set `chunk` to control how many rows go into each chunk. With `atomic: false`, each chunk commits independently. If a later chunk fails, earlier committed chunks stay in the database.
 
 Use `rowCount` to read the total affected rows after a successful call. To get the written rows back, use `.returning()` on the regular insert or update builder.
+
+### Cancel a bulk write
+
+With a pooled connection from `drizzle-orm/postgres`, you can pass your own `AbortSignal` to either bulk method through the `signal` option.
+
+In this example, if the insert is still running after five seconds, `AbortSignal.timeout(5_000)` requests cancellation. This can help limit how long the import holds locks.
+
+```ts
+const inserted = await db.bulkInsert(products, [
+  { sku: 'usb-c-hub', name: 'USB-C Hub' },
+  { sku: 'usb-c-adapter', name: 'USB-C Adapter' },
+], { signal: AbortSignal.timeout(5_000) });
+```
+
+For a stock update that the caller can cancel, use an `AbortController`.
+
+```ts
+const controller = new AbortController();
+
+const pending = db.bulkUpdate(products, [
+  { sku: 'usb-c-hub', name: 'USB-C Hub', stock: 40 },
+  { sku: 'usb-c-adapter', name: 'USB-C Adapter', stock: 75 },
+], {
+  by: products.sku,
+  signal: controller.signal,
+});
+
+// Call controller.abort() from your cancel handler.
+const updated = await pending;
+```
+
+If cancellation interrupts the write, the call rejects. By default, PostgreSQL rolls back the whole bulk write. With `atomic: false`, chunks that already committed stay in the database.
 
 ## Prepared queries
 
